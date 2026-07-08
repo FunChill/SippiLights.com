@@ -3,7 +3,9 @@ import type { ChangeEvent } from 'react'
 import { useBuilder } from '../context/BuilderContext'
 import { MARQUEE_COLORS } from '../lib/marqueeColors'
 import { getCharPrice } from '../data/inventory'
+import { wordToRequestedItems } from '../lib/availability'
 import { MarqueeChar } from './MarqueeChar'
+import { AvailabilityStatus } from './AvailabilityStatus'
 import { Button } from './Button'
 
 interface WordBuilderProps {
@@ -11,8 +13,17 @@ interface WordBuilderProps {
 }
 
 export function WordBuilder({ compact = false }: WordBuilderProps) {
-  const { word, setWord, color, setColorId, numberFinish, setNumberFinish, maxLength } =
-    useBuilder()
+  const {
+    word,
+    setWord,
+    color,
+    setColorId,
+    numberFinish,
+    setNumberFinish,
+    eventDate,
+    setEventDate,
+    maxLength,
+  } = useBuilder()
   const [hadInvalidChar, setHadInvalidChar] = useState(false)
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -73,6 +84,23 @@ export function WordBuilder({ compact = false }: WordBuilderProps) {
       </div>
 
       <p className="mt-6 font-headline text-xl text-gold sm:text-2xl">{priceLine}</p>
+
+      <div className="mt-6 max-w-xs">
+        <label htmlFor="builder-event-date" className="mb-2 block text-xs tracking-[0.15em] text-text-muted uppercase">
+          Check a Date
+        </label>
+        <input
+          id="builder-event-date"
+          type="date"
+          value={eventDate}
+          onChange={(e) => setEventDate(e.target.value)}
+          className="w-full rounded-button border border-gold/20 bg-charcoal-2 px-4 py-3 text-sm text-warm-white focus:border-gold focus:outline-none"
+        />
+        <AvailabilityStatus
+          date={eventDate}
+          requestedItems={wordToRequestedItems(word, numberFinish)}
+        />
+      </div>
 
       <div className="mt-6">
         <p className="mb-2 text-xs tracking-[0.15em] text-text-muted uppercase">

@@ -44,33 +44,46 @@ const NUMBERS: InventoryItem[] = '0123456789'
     })),
   )
 
+// Currently 6 fixtures owned; growing to 10 soon — update qtyOwned when the rest arrive.
 const LED_UPLIGHTING: InventoryItem = {
   id: 'led-uplighting',
   name: 'LED Uplighting',
   category: 'uplighting',
   finish: null,
   price: null,
-  qtyOwned: null,
-  unlimited: true,
+  qtyOwned: 6,
+  unlimited: false,
   imageSlot: '/inventory/led-uplighting.jpg',
 }
 
-const STAGES_ARCHES: InventoryItem = {
-  id: 'stages-arches',
-  name: 'Stages & Arches',
+const STAGE: InventoryItem = {
+  id: 'stage',
+  name: 'Stage',
   category: 'stage',
   finish: null,
   price: null,
-  qtyOwned: null,
+  qtyOwned: 1,
   unlimited: false,
-  imageSlot: '/inventory/stages-arches.jpg',
+  imageSlot: '/inventory/stage.jpg',
+}
+
+const ARCH_3D: InventoryItem = {
+  id: 'arch-3d',
+  name: '3D Arch',
+  category: 'stage',
+  finish: null,
+  price: null,
+  qtyOwned: 2,
+  unlimited: false,
+  imageSlot: '/inventory/arch-3d.jpg',
 }
 
 export const INVENTORY: InventoryItem[] = [
   ...LETTERS,
   ...NUMBERS,
   LED_UPLIGHTING,
-  STAGES_ARCHES,
+  STAGE,
+  ARCH_3D,
 ]
 
 export function getItemsByCategory(category: Category): InventoryItem[] {

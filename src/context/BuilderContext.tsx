@@ -13,6 +13,8 @@ interface BuilderContextValue {
   setColorId: (id: string) => void
   numberFinish: Finish
   setNumberFinish: (finish: Finish) => void
+  eventDate: string
+  setEventDate: (date: string) => void
   maxLength: number
 }
 
@@ -22,6 +24,7 @@ export function BuilderProvider({ children }: { children: ReactNode }) {
   const [word, setWordState] = useState('')
   const [color, setColor] = useState<MarqueeColor>(DEFAULT_COLOR)
   const [numberFinish, setNumberFinish] = useState<Finish>('white')
+  const [eventDate, setEventDate] = useState('')
 
   const setWord = (value: string) => setWordState(value.slice(0, MAX_LENGTH))
 
@@ -32,7 +35,17 @@ export function BuilderProvider({ children }: { children: ReactNode }) {
 
   return (
     <BuilderContext.Provider
-      value={{ word, setWord, color, setColorId, numberFinish, setNumberFinish, maxLength: MAX_LENGTH }}
+      value={{
+        word,
+        setWord,
+        color,
+        setColorId,
+        numberFinish,
+        setNumberFinish,
+        eventDate,
+        setEventDate,
+        maxLength: MAX_LENGTH,
+      }}
     >
       {children}
     </BuilderContext.Provider>

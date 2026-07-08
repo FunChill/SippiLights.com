@@ -1,13 +1,14 @@
 import { useSEO } from '../lib/seo'
 import { Button } from '../components/Button'
 import { ImagePlaceholder } from '../components/ImagePlaceholder'
+import { DateCheck } from '../components/DateCheck'
 import { getItemsByCategory, formatPrice } from '../data/inventory'
 
 const letterItems = getItemsByCategory('letter')
 const numberItems = getItemsByCategory('number')
 const uniqueDigits = [...new Set(numberItems.map((item) => item.name))]
 const [ledUplighting] = getItemsByCategory('uplighting')
-const [stagesArches] = getItemsByCategory('stage')
+const [stage, arch3d] = getItemsByCategory('stage')
 
 const FEATURE_ITEMS = [
   {
@@ -16,9 +17,14 @@ const FEATURE_ITEMS = [
     copy: 'Wireless LED uplights wash walls, tents, columns, and dance floors in color. Every fixture is remote-controlled and dialed in to your palette on site, so your venue transforms the moment the lights go up.',
   },
   {
-    item: stagesArches,
+    item: stage,
     finishNote: 'Built and installed on site',
-    copy: 'Illuminated stage risers and ceremony arches give your event a focal point, whether it is a head table, a first dance, or an "I do." Built sturdy, lit warm, and installed before your guests arrive.',
+    copy: 'A raised, illuminated stage anchors your head table, first dance, or performance with a clear focal point — built sturdy, lit warm, and set up before your guests arrive.',
+  },
+  {
+    item: arch3d,
+    finishNote: 'Built and installed on site',
+    copy: 'Our 3D arch frames the moment that matters — a ceremony backdrop, entrance, or photo centerpiece, illuminated and installed exactly where you want it.',
   },
 ]
 
@@ -70,6 +76,7 @@ export default function Services() {
               </div>
             ))}
           </div>
+          <DateCheck label="Marquee Letters" />
         </div>
 
         {/* Marquee Numbers */}
@@ -97,9 +104,10 @@ export default function Services() {
               </div>
             ))}
           </div>
+          <DateCheck label="Marquee Numbers" />
         </div>
 
-        {/* LED Uplighting + Stages & Arches */}
+        {/* LED Uplighting + Stage + 3D Arch */}
         <div className="mt-20 flex flex-col gap-16">
           {FEATURE_ITEMS.map(({ item, finishNote, copy }, i) => (
             <div
@@ -121,6 +129,7 @@ export default function Services() {
                 </p>
                 <p className="mt-1 text-sm text-text-muted">{finishNote}</p>
                 <p className="mt-4 text-text-muted">{copy}</p>
+                <DateCheck label={item.name} />
               </div>
             </div>
           ))}
