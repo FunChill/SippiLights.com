@@ -22,6 +22,7 @@ export const SITE = {
 export const NAV_LINKS = [
   { label: 'Home', to: '/' },
   { label: 'Services', to: '/services' },
+  { label: 'Word Builder', to: '/builder' },
   { label: 'Portfolio', to: '/portfolio' },
   { label: 'How It Works', to: '/how-it-works' },
   { label: 'About', to: '/about' },

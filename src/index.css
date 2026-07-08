@@ -70,3 +70,16 @@ button {
   );
   pointer-events: none;
 }
+
+@keyframes hue-cycle {
+  from {
+    filter: hue-rotate(0deg);
+  }
+  to {
+    filter: hue-rotate(360deg);
+  }
+}
+
+.marquee-color-shift {
+  animation: hue-cycle 4s linear infinite;
+}

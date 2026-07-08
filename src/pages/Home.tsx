@@ -3,6 +3,7 @@ import { useSEO } from '../lib/seo'
 import { SITE } from '../lib/site'
 import { Button } from '../components/Button'
 import { ImagePlaceholder } from '../components/ImagePlaceholder'
+import { WordBuilder } from '../components/WordBuilder'
 
 const SERVICES = [
   {
@@ -110,6 +111,26 @@ export default function Home() {
               className="relative aspect-[4/5] w-full"
             />
           </motion.div>
+        </div>
+      </section>
+
+      {/* Word Builder teaser */}
+      <section className="px-6 py-20 lg:px-10">
+        <div className="mx-auto max-w-4xl">
+          <p className="text-xs tracking-[0.2em] text-gold uppercase">
+            Try It Now
+          </p>
+          <h2 className="mt-4 font-headline text-3xl font-light lg:text-4xl">
+            Build Your Word
+          </h2>
+          <p className="mt-4 max-w-xl text-text-muted">
+            Type a name or number below and watch it light up as a marquee —
+            with your price, live.
+          </p>
+
+          <div className="mt-10 rounded-card border border-gold/10 bg-charcoal-2 p-6 lg:p-10">
+            <WordBuilder compact />
+          </div>
         </div>
       </section>
 

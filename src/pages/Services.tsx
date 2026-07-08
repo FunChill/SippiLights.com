@@ -1,30 +1,23 @@
 import { useSEO } from '../lib/seo'
 import { Button } from '../components/Button'
 import { ImagePlaceholder } from '../components/ImagePlaceholder'
+import { getItemsByCategory, formatPrice } from '../data/inventory'
 
-const SERVICES = [
+const letterItems = getItemsByCategory('letter')
+const numberItems = getItemsByCategory('number')
+const uniqueDigits = [...new Set(numberItems.map((item) => item.name))]
+const [ledUplighting] = getItemsByCategory('uplighting')
+const [stagesArches] = getItemsByCategory('stage')
+
+const FEATURE_ITEMS = [
   {
-    name: 'Marquee Letters',
-    price: '$70 per letter',
-    finish: 'Finish: white only',
-    copy: 'Freestanding, warm-white marquee letters spell out a name, word, or milestone across your venue. Each letter stands roughly four feet tall and runs on a single standard outlet, so they set up fast and read beautifully in photos day or night.',
-  },
-  {
-    name: 'Marquee Numbers',
-    price: '$70 per number',
-    finish: 'Finish: black or white',
-    copy: "Oversized marquee numbers anchor birthdays, anniversaries, and graduation years. Choose black or white to match your color scheme, and pair with letters for a full custom display.",
-  },
-  {
-    name: 'LED Uplighting',
-    price: 'Priced per event',
-    finish: 'Bulbs adjustable to any event color scheme',
+    item: ledUplighting,
+    finishNote: 'Bulbs adjustable to any event color scheme',
     copy: 'Wireless LED uplights wash walls, tents, columns, and dance floors in color. Every fixture is remote-controlled and dialed in to your palette on site, so your venue transforms the moment the lights go up.',
   },
   {
-    name: 'Stages & Arches',
-    price: 'Priced per event',
-    finish: 'Built and installed on site',
+    item: stagesArches,
+    finishNote: 'Built and installed on site',
     copy: 'Illuminated stage risers and ceremony arches give your event a focal point, whether it is a head table, a first dance, or an "I do." Built sturdy, lit warm, and installed before your guests arrive.',
   },
 ]
@@ -50,36 +43,111 @@ export default function Services() {
           no assembly required on your end.
         </p>
 
-        <div className="mt-16 flex flex-col gap-16">
-          {SERVICES.map((service, i) => (
+        {/* Marquee Letters */}
+        <div className="mt-16">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="font-headline text-3xl font-light">
+              Marquee Letters
+            </h2>
+            <p className="text-sm tracking-wide text-gold uppercase">
+              {formatPrice(letterItems[0].price)} per letter · White finish
+              only
+            </p>
+          </div>
+          <p className="mt-3 max-w-2xl text-text-muted">
+            Freestanding, warm-white marquee letters spell out a name, word,
+            or milestone across your venue. Every letter runs on a single
+            standard outlet, so setup is fast and it reads beautifully in
+            photos day or night.
+          </p>
+          <div className="mt-6 grid grid-cols-6 gap-2 sm:grid-cols-9 lg:grid-cols-[repeat(13,minmax(0,1fr))]">
+            {letterItems.map((item) => (
+              <div
+                key={item.id}
+                className="flex aspect-square items-center justify-center rounded-lg border border-gold/10 bg-charcoal-2 font-headline text-xl text-warm-white"
+              >
+                {item.name}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Marquee Numbers */}
+        <div className="mt-16">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="font-headline text-3xl font-light">
+              Marquee Numbers
+            </h2>
+            <p className="text-sm tracking-wide text-gold uppercase">
+              {formatPrice(numberItems[0].price)} per number · Black or White
+            </p>
+          </div>
+          <p className="mt-3 max-w-2xl text-text-muted">
+            Oversized marquee numbers anchor birthdays, anniversaries, and
+            graduation years. Choose black or white to match your color
+            scheme, and pair with letters for a full custom display.
+          </p>
+          <div className="mt-6 grid grid-cols-5 gap-2 sm:grid-cols-10">
+            {uniqueDigits.map((digit) => (
+              <div
+                key={digit}
+                className="flex aspect-square items-center justify-center rounded-lg border border-gold/10 bg-charcoal-2 font-headline text-xl text-warm-white"
+              >
+                {digit}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* LED Uplighting + Stages & Arches */}
+        <div className="mt-20 flex flex-col gap-16">
+          {FEATURE_ITEMS.map(({ item, finishNote, copy }, i) => (
             <div
-              key={service.name}
+              key={item.id}
               className={`grid items-center gap-10 lg:grid-cols-2 lg:gap-16 ${
                 i % 2 === 1 ? 'lg:[&>*:first-child]:order-2' : ''
               }`}
             >
               <ImagePlaceholder
-                label={`${service.name} photo`}
+                label={`${item.name} photo`}
                 className="aspect-[4/3] w-full"
               />
               <div>
                 <h2 className="font-headline text-3xl font-light">
-                  {service.name}
+                  {item.name}
                 </h2>
                 <p className="mt-2 text-sm tracking-wide text-gold uppercase">
-                  {service.price}
+                  {formatPrice(item.price)}
                 </p>
-                <p className="mt-1 text-sm text-text-muted">
-                  {service.finish}
-                </p>
-                <p className="mt-4 text-text-muted">{service.copy}</p>
+                <p className="mt-1 text-sm text-text-muted">{finishNote}</p>
+                <p className="mt-4 text-text-muted">{copy}</p>
               </div>
             </div>
           ))}
         </div>
 
-        <div className="mt-20 text-center">
-          <Button to="/contact">Check Availability</Button>
+        {/* Build Your Word banner */}
+        <div className="relative mt-20 overflow-hidden rounded-card border border-gold/15 px-6 py-12 text-center">
+          <div className="glow-gold" />
+          <div className="relative">
+            <h2 className="font-headline text-3xl font-light lg:text-4xl">
+              See Your Word{' '}
+              <span className="text-gold italic">Light Up</span>
+            </h2>
+            <p className="mx-auto mt-3 max-w-md text-text-muted">
+              Type your word or number and preview it as a glowing marquee —
+              with your price, instantly.
+            </p>
+            <div className="mt-6 flex justify-center">
+              <Button to="/builder">Build Your Word</Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-16 text-center">
+          <Button to="/contact" variant="ghost">
+            Check Availability
+          </Button>
         </div>
       </div>
     </div>
