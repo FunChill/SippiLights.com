@@ -1,5 +1,6 @@
 import { supabase } from './supabaseClient'
 import type { Finish } from '../data/inventory'
+import { SPECIAL_SCHEDULING_LEAD_DAYS } from '../config/pricing'
 
 export interface RequestedItem {
   character: string
@@ -157,12 +158,20 @@ export async function checkAvailability(
   }
 }
 
+function daysUntil(dateStr: string): number {
+  const target = new Date(`${dateStr}T00:00:00`)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+}
+
 /**
  * Human-readable summary of why a date isn't fully available, naming the
- * conflicting characters. Distinguishes a real date conflict (someone else
- * has it booked) from a fleet limit (we don't own enough of that character
- * at all, e.g. a word needing two "A"s when only one is owned) — the second
- * case isn't specific to the chosen date and saying "booked" would mislead.
+ * conflicting characters. Deliberately never reveals *why* an item is
+ * unavailable (booked vs. a fleet quantity limit) — customer-facing copy
+ * should never expose fleet size. With 14+ days of lead time the message
+ * stays open-ended ("may need special scheduling") since there may be time
+ * to work it out; under that, it's just "not available."
  */
 export function describeConflicts(result: AvailabilityResult): string {
   if (result.blocked) return result.blockReason ?? 'This date is unavailable.'
@@ -170,23 +179,13 @@ export function describeConflicts(result: AvailabilityResult): string {
   const conflicts = result.items.filter((i) => !i.available)
   if (conflicts.length === 0) return ''
 
-  const fleetLimited = conflicts.filter((c) => c.ownedQty < c.qty)
-  const dateBooked = conflicts.filter((c) => c.ownedQty >= c.qty)
+  const chars = conflicts.map((c) => `"${c.character}"`).join(', ')
+  const isPlural = conflicts.length > 1
+  const hasLeadTime = daysUntil(result.date) >= SPECIAL_SCHEDULING_LEAD_DAYS
 
-  const messages: string[] = []
-
-  if (dateBooked.length > 0) {
-    const chars = dateBooked.map((c) => `"${c.character}"`).join(', ')
-    const isPlural = dateBooked.length > 1
-    messages.push(
-      `The letter${isPlural ? 's' : ''} ${chars} ${isPlural ? 'are' : 'is'} booked that date.`,
-    )
+  if (hasLeadTime) {
+    return `The letter${isPlural ? 's' : ''} ${chars} may need special scheduling for that date — reach out and we'll confirm within 24 hours.`
   }
 
-  if (fleetLimited.length > 0) {
-    const chars = fleetLimited.map((c) => `"${c.character}" (need ${c.qty}, have ${c.ownedQty})`).join(', ')
-    messages.push(`We don't own enough of: ${chars}.`)
-  }
-
-  return messages.join(' ')
+  return `The letter${isPlural ? 's' : ''} ${chars} ${isPlural ? 'are' : 'is'} not available for that date.`
 }

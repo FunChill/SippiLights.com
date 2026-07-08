@@ -13,6 +13,12 @@ export const MIN_MARQUEES_OUTSIDE_25 = 4
 
 export const HOME_BASE_ZIP = '39211'
 
+// Below this many days of lead time, an unavailable item is just "not
+// available." At or above it, the door stays open ("may need special
+// scheduling") since there may be time to build/source/reallocate.
+// Customer-facing wording must never reveal *why* something's unavailable.
+export const SPECIAL_SCHEDULING_LEAD_DAYS = 14
+
 /**
  * Deposit due now for a marquee order. 1 marquee = flat $20. 2+ marquees =
  * 25% of the marquee subtotal, rounded to the nearest dollar. Non-marquee
