@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { DEFAULT_COLOR, MARQUEE_COLORS } from '../lib/marqueeColors'
 import type { MarqueeColor } from '../lib/marqueeColors'
 import type { Finish } from '../data/inventory'
+import { isReturningFromCancelledCheckout, loadDraft } from '../lib/checkoutDraft'
 
 const MAX_LENGTH = 20
 
@@ -21,10 +22,14 @@ interface BuilderContextValue {
 const BuilderContext = createContext<BuilderContextValue | null>(null)
 
 export function BuilderProvider({ children }: { children: ReactNode }) {
-  const [word, setWordState] = useState('')
-  const [color, setColor] = useState<MarqueeColor>(DEFAULT_COLOR)
-  const [numberFinish, setNumberFinish] = useState<Finish>('white')
-  const [eventDate, setEventDate] = useState('')
+  const draft = isReturningFromCancelledCheckout() ? loadDraft() : null
+
+  const [word, setWordState] = useState(draft?.word ?? '')
+  const [color, setColor] = useState<MarqueeColor>(
+    () => MARQUEE_COLORS.find((c) => c.id === draft?.colorId) ?? DEFAULT_COLOR,
+  )
+  const [numberFinish, setNumberFinish] = useState<Finish>(draft?.numberFinish ?? 'white')
+  const [eventDate, setEventDate] = useState(draft?.eventDate ?? '')
 
   const setWord = (value: string) => setWordState(value.slice(0, MAX_LENGTH))
 

@@ -36,7 +36,7 @@ export default function About() {
             care to every event we light across the metro.
           </p>
           <div className="mt-8">
-            <Button to="/contact">Check Availability</Button>
+            <Button to="/book">Check Availability</Button>
           </div>
         </div>
 

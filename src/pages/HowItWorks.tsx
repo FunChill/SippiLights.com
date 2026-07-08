@@ -75,7 +75,7 @@ export default function HowItWorks() {
         </div>
 
         <div className="mt-16 text-center">
-          <Button to="/contact">Check Availability</Button>
+          <Button to="/book">Check Availability</Button>
         </div>
       </div>
     </div>

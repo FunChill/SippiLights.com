@@ -37,7 +37,7 @@ export function Nav() {
           </nav>
 
           <div className="hidden lg:block">
-            <Button to="/contact">Check Availability</Button>
+            <Button to="/book">Check Availability</Button>
           </div>
 
           <button
@@ -82,7 +82,7 @@ export function Nav() {
                 {link.label}
               </NavLink>
             ))}
-            <Button to="/contact" className="mt-4" onClick={() => setOpen(false)}>
+            <Button to="/book" className="mt-4" onClick={() => setOpen(false)}>
               Check Availability
             </Button>
           </motion.div>

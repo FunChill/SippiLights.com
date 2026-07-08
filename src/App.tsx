@@ -8,6 +8,8 @@ import HowItWorks from './pages/HowItWorks'
 import About from './pages/About'
 import Contact from './pages/Contact'
 import Builder from './pages/Builder'
+import Book from './pages/Book'
+import BookConfirmed from './pages/BookConfirmed'
 
 function App() {
   return (
@@ -22,6 +24,8 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/builder" element={<Builder />} />
+            <Route path="/book" element={<Book />} />
+            <Route path="/book/confirmed" element={<BookConfirmed />} />
           </Routes>
         </Layout>
       </BuilderProvider>

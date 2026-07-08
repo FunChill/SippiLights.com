@@ -59,6 +59,35 @@ export function wordToRequestedItems(word: string, numberFinish: Finish): Reques
   return [...byKey.values()]
 }
 
+/** Dates within [startDate, endDate] (inclusive, 'YYYY-MM-DD') that have at least one real booking — for shading a calendar. Not per-character; a shaded date may still have specific letters/numbers available. */
+export async function getBookedDatesInRange(
+  startDate: string,
+  endDate: string,
+): Promise<Set<string>> {
+  const { data, error } = await supabase.rpc('get_booked_dates', {
+    start_date: startDate,
+    end_date: endDate,
+  })
+
+  if (error) throw error
+  return new Set((data ?? []).map((row: { event_date: string }) => row.event_date))
+}
+
+/** Manually-blocked dates (holidays, maintenance) within [startDate, endDate] — for shading a calendar. */
+export async function getBlockedDatesInRange(
+  startDate: string,
+  endDate: string,
+): Promise<Set<string>> {
+  const { data, error } = await supabase
+    .from('availability_blocks')
+    .select('date')
+    .gte('date', startDate)
+    .lte('date', endDate)
+
+  if (error) throw error
+  return new Set((data ?? []).map((row) => row.date))
+}
+
 /** Lightweight check for whether a date is manually blocked (holiday, maintenance) — no character-level detail. */
 export async function checkDateBlocked(
   date: string,
@@ -128,14 +157,36 @@ export async function checkAvailability(
   }
 }
 
-/** Human-readable summary of why a date isn't fully available, naming the conflicting characters. */
+/**
+ * Human-readable summary of why a date isn't fully available, naming the
+ * conflicting characters. Distinguishes a real date conflict (someone else
+ * has it booked) from a fleet limit (we don't own enough of that character
+ * at all, e.g. a word needing two "A"s when only one is owned) — the second
+ * case isn't specific to the chosen date and saying "booked" would mislead.
+ */
 export function describeConflicts(result: AvailabilityResult): string {
   if (result.blocked) return result.blockReason ?? 'This date is unavailable.'
 
   const conflicts = result.items.filter((i) => !i.available)
   if (conflicts.length === 0) return ''
 
-  const chars = conflicts.map((c) => `"${c.character}"`).join(', ')
-  const isPlural = conflicts.length > 1
-  return `The letter${isPlural ? 's' : ''} ${chars} ${isPlural ? 'are' : 'is'} booked that date.`
+  const fleetLimited = conflicts.filter((c) => c.ownedQty < c.qty)
+  const dateBooked = conflicts.filter((c) => c.ownedQty >= c.qty)
+
+  const messages: string[] = []
+
+  if (dateBooked.length > 0) {
+    const chars = dateBooked.map((c) => `"${c.character}"`).join(', ')
+    const isPlural = dateBooked.length > 1
+    messages.push(
+      `The letter${isPlural ? 's' : ''} ${chars} ${isPlural ? 'are' : 'is'} booked that date.`,
+    )
+  }
+
+  if (fleetLimited.length > 0) {
+    const chars = fleetLimited.map((c) => `"${c.character}" (need ${c.qty}, have ${c.ownedQty})`).join(', ')
+    messages.push(`We don't own enough of: ${chars}.`)
+  }
+
+  return messages.join(' ')
 }

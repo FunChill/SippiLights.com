@@ -79,7 +79,7 @@ export default function Home() {
               birthdays, weddings, and every celebration worth remembering.
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
-              <Button to="/contact">Check Availability</Button>
+              <Button to="/book">Check Availability</Button>
               <Button to="/portfolio" variant="ghost">
                 View Our Work
               </Button>
@@ -203,7 +203,7 @@ export default function Home() {
             <span className="text-gold italic">Lock it in.</span>
           </h2>
           <div className="mt-8 flex justify-center">
-            <Button to="/contact">Check Availability</Button>
+            <Button to="/book">Check Availability</Button>
           </div>
         </div>
       </section>

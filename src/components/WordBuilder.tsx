@@ -10,9 +10,15 @@ import { Button } from './Button'
 
 interface WordBuilderProps {
   compact?: boolean
+  showDateField?: boolean
+  showCTA?: boolean
 }
 
-export function WordBuilder({ compact = false }: WordBuilderProps) {
+export function WordBuilder({
+  compact = false,
+  showDateField = true,
+  showCTA = true,
+}: WordBuilderProps) {
   const {
     word,
     setWord,
@@ -85,22 +91,24 @@ export function WordBuilder({ compact = false }: WordBuilderProps) {
 
       <p className="mt-6 font-headline text-xl text-gold sm:text-2xl">{priceLine}</p>
 
-      <div className="mt-6 max-w-xs">
-        <label htmlFor="builder-event-date" className="mb-2 block text-xs tracking-[0.15em] text-text-muted uppercase">
-          Check a Date
-        </label>
-        <input
-          id="builder-event-date"
-          type="date"
-          value={eventDate}
-          onChange={(e) => setEventDate(e.target.value)}
-          className="w-full rounded-button border border-gold/20 bg-charcoal-2 px-4 py-3 text-sm text-warm-white focus:border-gold focus:outline-none"
-        />
-        <AvailabilityStatus
-          date={eventDate}
-          requestedItems={wordToRequestedItems(word, numberFinish)}
-        />
-      </div>
+      {showDateField && (
+        <div className="mt-6 max-w-xs">
+          <label htmlFor="builder-event-date" className="mb-2 block text-xs tracking-[0.15em] text-text-muted uppercase">
+            Check a Date
+          </label>
+          <input
+            id="builder-event-date"
+            type="date"
+            value={eventDate}
+            onChange={(e) => setEventDate(e.target.value)}
+            className="w-full rounded-button border border-gold/20 bg-charcoal-2 px-4 py-3 text-sm text-warm-white focus:border-gold focus:outline-none"
+          />
+          <AvailabilityStatus
+            date={eventDate}
+            requestedItems={wordToRequestedItems(word, numberFinish)}
+          />
+        </div>
+      )}
 
       <div className="mt-6">
         <p className="mb-2 text-xs tracking-[0.15em] text-text-muted uppercase">
@@ -150,14 +158,16 @@ export function WordBuilder({ compact = false }: WordBuilderProps) {
         </div>
       </div>
 
-      <div className="mt-8 flex flex-wrap gap-4">
-        <Button to="/contact">Check This Date</Button>
-        {compact && (
-          <Button to="/builder" variant="ghost">
-            Open Full Builder
-          </Button>
-        )}
-      </div>
+      {showCTA && (
+        <div className="mt-8 flex flex-wrap gap-4">
+          <Button to="/book">Check This Date</Button>
+          {compact && (
+            <Button to="/builder" variant="ghost">
+              Open Full Builder
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   )
 }

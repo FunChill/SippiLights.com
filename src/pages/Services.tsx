@@ -154,7 +154,7 @@ export default function Services() {
         </div>
 
         <div className="mt-16 text-center">
-          <Button to="/contact" variant="ghost">
+          <Button to="/book" variant="ghost">
             Check Availability
           </Button>
         </div>
