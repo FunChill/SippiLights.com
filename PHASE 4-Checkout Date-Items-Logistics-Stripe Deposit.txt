@@ -1,0 +1,42 @@
+PHASE 4 — Checkout: Date → Items → Logistics → Stripe Deposit
+
+# SIPPI LIGHTS — ANTIGRAVITY BUILD PROMPT
+## Task: Phase 4 — Booking Checkout Flow + Stripe Deposit
+## Branch: phase4 (branch from approved Phase 3)
+
+---
+
+## CONTEXT
+Availability engine is live. This phase builds the self-service checkout: a customer picks a date, builds their order, answers logistics, and pays a deposit online. Goal: zero owner involvement for a standard booking.
+
+## PRICING CONSTANTS — src/config/pricing.ts (single source of truth, flagged for Walt approval)
+- MARQUEE_PRICE = 70
+- DEPOSIT_PERCENT = 0.50  // 50% deposit — WALT MUST CONFIRM before production
+- FREE_DELIVERY_RADIUS_MI = 25
+- MAX_RADIUS_MI = 50
+- MIN_MARQUEES_OUTSIDE_25 = 4
+- HOME_BASE_ZIP = '39211'
+
+## CHECKOUT FLOW — route /book (multi-step, single page, Motion transitions)
+Step 1 — Date: calendar picker. Live availability check on select. Blocked/booked dates visually distinct.
+Step 2 — Items: word builder embedded (carries state if arriving from /builder) + add-ons list (LED Uplighting, Stages & Arches as "request with booking — priced at confirmation"). Live availability per character for chosen date.
+Step 3 — Logistics:
+- Indoor / Outdoor toggle. If Outdoor: show weather policy inline (outdoor requires rain chance under 20% and winds under 10 mph; standard outlet within 25 ft) + required checkbox acknowledging policy.
+- Venue address input. Distance estimate: use ZIP-prefix lookup table for Jackson metro ZIPs (src/data/zipDistances.ts — build a static table of metro ZIPs to approximate miles from 39211; exact geocoding is a later upgrade, note this in code comments).
+- Rules enforced: within 25mi → "Free delivery ✓". 26–50mi → require 4+ marquees or block with clear message. Over 50mi → "Outside service area — contact us."
+Step 4 — Contact info: name, phone, email, event type.
+Step 5 — Review + Deposit: order summary, subtotal, deposit due now (50%), balance due at delivery. "Reserve My Date" button → Stripe Checkout.
+
+## STRIPE (approved — standard stack)
+- Add stripe + @stripe/stripe-js. Server side: Vercel serverless function /api/create-checkout-session (this repo deploys to Vercel — add /api directory).
+- One-time payment Checkout Session for deposit amount. Metadata: booking_id.
+- Webhook /api/stripe-webhook: on checkout.session.completed → set booking deposit_paid=true, status='confirmed'.
+- Booking row is created with status 'pending_deposit' BEFORE redirect to Stripe; availability engine already counts pending_deposit rows, preventing double-booking during payment.
+- Abandoned sessions: Vercel cron or scheduled function releases pending_deposit bookings older than 60 minutes (set to 'cancelled').
+- Success page /book/confirmed: confirmation summary + "what happens next." Cancel page returns to review step with order intact.
+
+## ENV
+STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, VITE_STRIPE_PUBLISHABLE_KEY in .env.example. Test mode only this phase.
+
+## CONFIRMATION GATE
+Report: full flow works in Stripe test mode end-to-end, double-booking prevented during payment window, distance rules enforced (test all three zones), abandoned-session release works, webhook verified with Stripe CLI, clean build. NO live Stripe keys. Do NOT merge until Walt confirms deposit percent and flow.

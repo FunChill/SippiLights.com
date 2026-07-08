@@ -1,0 +1,36 @@
+/* Sippi Lights — Brand Token System */
+
+:root {
+  /* Colors */
+  --charcoal: #1c1b19;
+  --charcoal-2: #242220;
+  --warm-white: #fafaf8;
+  --gold: #c9a84c;
+  --gold-light: #e8d08a;
+  --purple: #9b72cf;
+  --text-muted: rgba(250, 250, 248, 0.55);
+
+  /* Typography */
+  --font-headline: 'Cormorant Garamond', serif;
+  --font-body: 'DM Sans', sans-serif;
+
+  /* Radii */
+  --radius-button: 8px;
+  --radius-card: 12px;
+}
+
+@theme inline {
+  --color-charcoal: var(--charcoal);
+  --color-charcoal-2: var(--charcoal-2);
+  --color-warm-white: var(--warm-white);
+  --color-gold: var(--gold);
+  --color-gold-light: var(--gold-light);
+  --color-purple: var(--purple);
+  --color-text-muted: var(--text-muted);
+
+  --font-headline: var(--font-headline);
+  --font-body: var(--font-body);
+
+  --radius-button: var(--radius-button);
+  --radius-card: var(--radius-card);
+}

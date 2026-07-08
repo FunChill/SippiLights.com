@@ -1,0 +1,76 @@
+PHASE 1 — Scaffold + Brand System + Hero + 6-Page Shell
+
+# SIPPI LIGHTS — ANTIGRAVITY BUILD PROMPT
+## Task: Phase 1 — Project Scaffold, Brand System, Hero, 6-Page Shell
+## Branch: main (new repo: sippilights)
+
+---
+
+## CONTEXT
+Sippi Lights is a marquee letter/number and event lighting rental business in Jackson, MS (39211). This is a full custom rebuild — a booking-machine website that handles intake, availability, scheduling, deposits, and FAQ so the owner rarely has to speak with clients. This phase builds the foundation: project scaffold, brand token system, approved hero section, navigation, and all 6 page shells with real copy.
+
+## STACK (do not deviate)
+- React 19 + TypeScript + Vite
+- Tailwind v4
+- Motion (framer-motion) for animation
+- React Router for pages
+- Deployment target: Vercel
+- NO other dependencies without explicit approval
+
+## BRAND SYSTEM — create src/styles/tokens.css and reference everywhere
+- --charcoal: #1C1B19 (primary background)
+- --charcoal-2: #242220 (raised surfaces)
+- --warm-white: #FAFAF8 (primary text)
+- --gold: #C9A84C (accent, CTAs)
+- --gold-light: #E8D08A (hover states)
+- --purple: #9B72CF (rare atmospheric accent only — glows, rim light)
+- --text-muted: rgba(250,250,248,0.55)
+- Headline font: Cormorant Garamond (Google Fonts) — weights 300, 400, 500 + italic
+- Body/UI font: DM Sans (Google Fonts) — weights 400, 500
+- Corners: 8px buttons, 12px cards
+- Flat design. No decorative shadows. No gradient fills. Soft radial GLOW effects are permitted as atmosphere (they are light, not decoration — this is a lighting company).
+
+## PAGES (React Router)
+/ (Home) · /services · /portfolio · /how-it-works · /about · /contact
+Every page gets real copy — NO lorem ipsum, NO placeholders.
+
+## NAVIGATION (all pages)
+- Fixed top bar: logo left ("Sippi Lights" — Cormorant Garamond, gold), links center, CTA right
+- Links: Home · Services · Portfolio · How It Works · About · Contact
+- CTA button: "Check Availability" — gold fill, charcoal text, 8px radius → links to /contact for now
+- Nav background: semi-transparent charcoal with blur, 1px gold bottom border at 15% opacity
+- Mobile: hamburger menu, full-screen overlay
+
+## HOME PAGE HERO (match approved design exactly)
+- Two columns: copy left, image right
+- Eyebrow: "JACKSON, MS · FREE DELIVERY WITHIN 25 MILES" (gold, letterspaced, uppercase, small)
+- H1: "Light Up Your Most *Memorable* Moment" — "Memorable" in gold italic. Large serif, 64px+ desktop.
+- Sub: "Marquee letters, numbers, LED uplighting and stages for birthdays, weddings, and every celebration worth remembering."
+- Buttons: "Check Availability" (gold fill) + "View Our Work" (gold outline ghost) → /portfolio
+- Stat bar below divider: $70 / PER MARQUEE · 25 mi / FREE DELIVERY · 50 mi / SERVICE RADIUS
+- Right: hero image slot (src/assets/hero.jpg placeholder file) with soft gold radial glow bloom behind it (gold at 10–15% opacity)
+- Hero section ends tight below stat bar — no dead space
+- Subtle entrance animations via Motion: fade-up on copy, fade-in on image
+
+## HOME PAGE ADDITIONAL SECTIONS (below hero)
+1. Services preview — 4 cards: Marquee Letters (White, $70/ea), Marquee Numbers (Black or White, $70/ea), LED Uplighting, Stages & Arches. Card hover: background shifts to charcoal-2, gold border glow.
+2. How It Works strip — 3 steps: You Reserve → We Deliver & Set Up → We Pick Up. One sentence each.
+3. Service area — copy block: free delivery within 25 miles of Jackson MS; 26–50 miles requires 4+ marquee minimum. Serving Brandon, Ridgeland, Madison, Pearl, Flowood, Clinton, Byram and surrounding.
+4. CTA banner — "Your date is filling up. Lock it in." + Check Availability button.
+
+## OTHER PAGE SHELLS (real copy, structure only — deep functionality comes in later phases)
+- /services: full section per service with description, pricing where set ($70 per marquee letter/number), finish options (Letters: white only. Numbers: black or white), LED color customization note (bulbs adjustable to any event color scheme).
+- /portfolio: responsive photo grid, 8 image slots reading from src/assets/portfolio/, occasion label overlay on hover.
+- /how-it-works: expanded 3-step process + indoor/outdoor requirements (standard power outlet within 25ft; outdoor requires rain chance under 20% and winds under 10mph).
+- /about: Sippi Lights story — 2+ years serving Jackson metro, owner-operated, every setup handled personally. Tagline: "Elevated Event Illumination."
+- /contact: quote form UI (name, phone, email, event date, event type dropdown, services multi-select, message) — form is visual only this phase; submission wiring comes in Phase 3.
+
+## SEO FOUNDATION (this phase)
+- react-helmet-async style per-page titles + meta descriptions (implement with plain document API if avoiding the dependency)
+- Title pattern: "Marquee Letter Rentals Jackson MS | Sippi Lights" (Home) — each page gets a keyword-targeted title
+- Semantic HTML: single h1 per page, proper heading hierarchy, alt text on all images
+- public/robots.txt + public/sitemap.xml (static, all 6 routes)
+- Footer on all pages: Sippi Lights · Elevated Event Illumination · © 2025 · nav links · Jackson, MS
+
+## CONFIRMATION GATE
+Report: repo structure, routes working, tokens.css created, hero matches approved design, all 6 pages render with real copy, clean build (npm run build passes), zero console errors. Do NOT deploy. Do NOT merge until Walt confirms.

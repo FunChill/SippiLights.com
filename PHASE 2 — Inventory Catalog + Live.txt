@@ -1,0 +1,47 @@
+PHASE 2 — Inventory Catalog + Live Word Builder (Showstopper)
+
+# SIPPI LIGHTS — ANTIGRAVITY BUILD PROMPT
+## Task: Phase 2 — Inventory Catalog + Live Word Builder
+## Branch: phase2 (branch from approved Phase 1)
+
+---
+
+## CONTEXT
+Phase 1 shell is approved. This phase builds the signature feature: a live word builder where customers type a word/number, see it rendered as glowing marquee characters, and get an instant price. Also builds the structured inventory catalog on /services. No backend yet — inventory is a typed local data file that Phase 3 will migrate to Supabase.
+
+## INVENTORY DATA — create src/data/inventory.ts
+Typed catalog:
+- Letters A–Z: finish "white" only, price 70, qty 1 each (qty editable constant)
+- Numbers 0–9: finishes "black" and "white", price 70, qty 1 per finish (editable)
+- LED Uplighting: price null ("Ask for pricing"), unlimited qty flag
+- Stages & Arches: price null ("Ask for pricing")
+- Every item: id, name, category, finish, price, qtyOwned, imageSlot path
+All prices come from this ONE file. Never hardcode prices in components.
+
+## LIVE WORD BUILDER — new route /builder + featured section on Home
+- Large input: "Type your word or number"
+- As the user types, render each character as a stylized marquee character: warm-white face, visible "bulb" dots (CSS radial dots), soft gold glow. Characters animate in with Motion (pop + glow-up, staggered).
+- Color picker row: Warm White, Red, Pink, Blue, Green, Amber, Purple, Color-Shift — selecting a color changes the bulb glow color live.
+- Finish toggle for numbers: Black / White (letters locked to White, show lock note)
+- Live price line: "8 marquees × $70 = $560" — updates per keystroke. Non-alphanumeric characters ignored with a gentle note.
+- Character limit 20. Spaces allowed (not priced).
+- CTA under builder: "Check This Date" → /contact (Phase 4 will route this into checkout carrying the built word)
+- Persist builder state in a React context so it survives navigation.
+- Mobile: characters wrap, scale down gracefully.
+
+## SERVICES PAGE UPGRADE
+Rebuild /services from inventory.ts:
+- Category sections: Marquee Letters, Marquee Numbers, LED Uplighting, Stages & Arches
+- Item cards: image slot, name, finish badges, price
+- "Build Your Word" banner linking to /builder
+
+## HOME PAGE
+Insert Word Builder teaser section after hero: mini live builder (input + rendered characters + price) with "Open Full Builder" link.
+
+## RULES
+- No new dependencies.
+- All styling from tokens.css. Glow = gold/selected color at low opacity, atmospheric only.
+- Real copy everywhere.
+
+## CONFIRMATION GATE
+Report: builder renders characters with live glow color + live price, finish toggle works, state persists across navigation, services page reads 100% from inventory.ts, clean build. Do NOT merge until Walt confirms.

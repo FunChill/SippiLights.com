@@ -1,0 +1,54 @@
+PHASE 3 — Supabase: Inventory, Bookings, Live Availability
+
+# SIPPI LIGHTS — ANTIGRAVITY BUILD PROMPT
+## Task: Phase 3 — Supabase Backend: Inventory, Bookings, Availability Engine
+## Branch: phase3 (branch from approved Phase 2)
+
+---
+
+## CONTEXT
+Frontend catalog and word builder are approved. This phase adds the real backend: Supabase project with inventory, bookings, and availability checking. "Check Availability" becomes live. Quote form submissions store to the database. This is a SINGLE-business system — one inventory, one calendar. Keep it simple.
+
+## SETUP
+- Add @supabase/supabase-js (approved dependency for this phase)
+- Env vars: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY (.env.local, gitignored; provide .env.example)
+- Generate a supabase/migrations SQL file so schema is reproducible
+
+## SCHEMA
+Table inventory_items:
+- id uuid pk, name text, category text, character char(1) null, finish text, price numeric null, qty_owned int default 1, active bool default true
+Seed from src/data/inventory.ts values (write a seed SQL file).
+
+Table bookings:
+- id uuid pk, created_at, event_date date, status text check in ('inquiry','pending_deposit','confirmed','completed','cancelled'),
+- customer_name, customer_phone, customer_email,
+- event_type text, indoor_outdoor text, venue_address text, distance_miles numeric null,
+- items jsonb (array of {itemId, character, finish, qty, price}),
+- word_built text null, led_color text null,
+- subtotal numeric, deposit_due numeric, deposit_paid bool default false,
+- notes text
+
+Table availability_blocks (owner manual blocks — holidays, maintenance):
+- id uuid pk, date date, reason text
+
+## AVAILABILITY LOGIC — src/lib/availability.ts
+checkAvailability(date, requestedItems[]):
+1. Reject if date in availability_blocks.
+2. Pull bookings on that date with status pending_deposit or confirmed.
+3. Sum qty per character+finish across those bookings.
+4. For each requested item: available if qty_owned - booked_qty >= requested qty.
+5. Return per-item availability + overall boolean.
+Client-side call via anon key with a read-only RPC or view — do NOT expose full booking rows publicly. Create a Postgres function get_booked_quantities(check_date) returning only {character, finish, qty} aggregates. RLS: public can execute the function and insert inquiries; only authenticated (owner) can read/update bookings.
+
+## WIRE THE FRONTEND
+1. Word Builder + /contact date field: after date + word entered, show live availability result — green "Available for June 14" or amber "HAPPY — the letter P is booked that date" (name the conflicting characters).
+2. Contact/quote form now submits: creates bookings row with status 'inquiry', items from builder state if present. Success screen: "Request received — we'll confirm within 24 hours." Failure handling with retry.
+3. Services page: optional date-check input per category ("Check a date") using same function.
+
+## RLS SUMMARY
+- inventory_items: public read (active=true only)
+- bookings: public INSERT (status forced to 'inquiry' via trigger), owner-only SELECT/UPDATE/DELETE
+- availability function: public execute, returns aggregates only
+
+## CONFIRMATION GATE
+Report: migration + seed files created, RLS policies active, availability function returns correct aggregates, inquiry insert works end-to-end from the form, conflicting-character messaging works, no booking PII exposed to anon role, clean build. Do NOT merge until Walt confirms.

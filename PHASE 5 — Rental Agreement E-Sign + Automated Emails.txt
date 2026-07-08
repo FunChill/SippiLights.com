@@ -1,0 +1,30 @@
+PHASE 5 — Rental Agreement E-Sign + Automated Emails
+
+# SIPPI LIGHTS — ANTIGRAVITY BUILD PROMPT
+## Task: Phase 5 — Rental Agreement + Automated Communications
+## Branch: phase5 (branch from approved Phase 4)
+
+---
+
+## CONTEXT
+Checkout works. This phase adds the rental agreement (accepted during checkout, stored as PDF) and the automated email lifecycle so no manual follow-up is needed.
+
+## RENTAL AGREEMENT
+- src/content/rental-agreement.ts — full agreement text as structured sections. Draft real content covering: rental period (per calendar day), delivery/setup/pickup included, customer responsibility for damage/loss from setup completion to pickup, indoor/outdoor + power requirements (standard outlet within 25ft), outdoor weather policy (under 20% rain, under 10mph wind — Sippi Lights may cancel outdoor setup for unsafe weather with reschedule or refund of deposit), no relocation of displays by client, cancellation policy (deposit refundable 14+ days out, credit within 14 days — WALT MUST CONFIRM these terms), payment terms (50% deposit, balance at delivery).
+- Mark file header: "DRAFT — Walt review + attorney review before production."
+- Checkout Step 5 gains a required scroll-box agreement + checkbox: "I have read and agree to the Rental Agreement" with timestamp + name recorded on the booking row (agreement_accepted_at, agreement_name).
+- @react-pdf/renderer (standard stack): generate agreement PDF with customer name, event date, order summary, acceptance timestamp. Upload to Supabase Storage bucket 'agreements' (owner-only access). Store file path on booking.
+
+## AUTOMATED EMAILS — Resend (NEW DEPENDENCY — Walt pre-approved in planning; free tier)
+Vercel serverless functions using Resend API, triggered as follows:
+1. Booking confirmed (webhook success) → Confirmation email: order summary, event date, delivery expectations, agreement PDF attached, balance due reminder.
+2. 3 days before event_date (Vercel cron daily) → Reminder email: delivery details, venue/power checklist, contact number.
+3. 1 day after event_date (same cron) → Thank-you email: review request with Google review link placeholder GOOGLE_REVIEW_URL env var, and "book your next event" link.
+4. Inquiry received (status 'inquiry' insert) → auto-reply: "Got your request — we respond within 24 hours" + owner notification email to OWNER_EMAIL env var.
+Tone for all emails: casually friendly, excited for the customer's event, it's all about their moment. Real copy, no placeholders except env-var links.
+
+## ENV
+RESEND_API_KEY, OWNER_EMAIL, GOOGLE_REVIEW_URL in .env.example.
+
+## CONFIRMATION GATE
+Report: agreement renders + PDF generates + stores correctly, acceptance recorded on booking, all 4 email types fire in test (Resend test mode / logged), cron configured in vercel.json, clean build. Agreement terms flagged for Walt + attorney review. Do NOT merge until Walt confirms.

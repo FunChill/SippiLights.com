@@ -1,0 +1,48 @@
+PHASE 6 — Admin Dashboard + FAQ + Local SEO/AEO + Spline Slot
+
+# SIPPI LIGHTS — ANTIGRAVITY BUILD PROMPT
+## Task: Phase 6 — Admin Dashboard, FAQ Engine, Local SEO/AEO Layer, Spline Hero Slot
+## Branch: phase6 (branch from approved Phase 5)
+
+---
+
+## CONTEXT
+The booking machine is functional. This phase gives the owner a one-screen command center, builds the FAQ deflection layer, and installs the local SEO/AEO layer that makes Sippi Lights the answer when Jackson-area customers (or their AI assistants) ask about marquee rentals.
+
+## ADMIN DASHBOARD — /admin (Supabase Auth, email+password, owner only)
+Single-screen layout:
+- Month calendar: bookings color-coded by status. Click → booking detail drawer.
+- Booking detail: full customer + order info, status changer, deposit/balance state, agreement PDF link, notes field, "mark balance paid," cancel/refund note field.
+- Upcoming list: next 14 days of deliveries/pickups.
+- Quick actions: block a date (availability_blocks insert), manual booking entry (phone customers), mark item inactive (repairs).
+- Inquiries inbox: status 'inquiry' rows, one-click convert to pending booking (sends customer a payment link — reuse Phase 4 session creation).
+- Mobile-friendly — Walt manages from phone in the field.
+
+## FAQ ENGINE — /faq + accordion section on Home
+src/content/faq.ts — real answers, structured for schema output:
+power requirements (standard outlet within 25ft; up to ~9 marquees per breaker), indoor/outdoor rules + weather policy, rental period (per calendar day), delivery zones (25mi free / 26–50mi with 4+ marquee minimum), setup+teardown included, booking window ("book as early as possible — dates are first come, first served"), deposit + cancellation, finishes (letters white; numbers black or white), LED colors (any color, adjustable to event scheme), payment methods, what marquees are made of, wet weather handling.
+Accordion UI, category-grouped, searchable input filter.
+
+## LOCAL SEO / AEO LAYER (major priority)
+1. JSON-LD structured data injected per page:
+   - LocalBusiness (type: Event equipment rental) — name, Jackson MS 39211 area, geo, service radius 50mi, phone, priceRange "$70+", areaServed list (Jackson, Brandon, Ridgeland, Madison, Pearl, Flowood, Clinton, Byram)
+   - FAQPage schema generated from faq.ts on /faq
+   - Service schema per service on /services
+   - Product-style offer markup on marquee items (price 70 USD)
+2. Occasion landing pages (SEO/AEO money pages) — /rentals/[occasion] static routes:
+   /rentals/birthday-marquee-jackson-ms · /rentals/wedding-marquee-jackson-ms · /rentals/quinceanera-marquee-jackson-ms · /rentals/corporate-event-lighting-jackson-ms · /rentals/graduation-marquee-jackson-ms
+   Each: unique 400+ word real copy targeting the occasion + geo, occasion-relevant word examples (SWEET 16, MR & MRS, CLASS OF 2026), photos slots, embedded availability checker, FAQ subset, CTA. Interlink all.
+3. AEO specifics: every FAQ answer written as a direct, quotable 2–3 sentence answer (answer-first format AI assistants can cite). H2s phrased as natural questions ("How much does it cost to rent marquee letters in Jackson MS?").
+4. Update sitemap.xml with all new routes; canonical tags; OG + Twitter meta with real preview copy per page.
+5. Performance pass: lazy-load images, font-display swap, Lighthouse 90+ on Performance and SEO — report scores.
+
+## SPLINE HERO SLOT
+- Create src/components/SplineHero.tsx: lazy-loaded container that renders the hero image fallback until a Spline scene URL is provided via SPLINE_SCENE_URL env/config constant. Respects prefers-reduced-motion (static image). Do NOT add the Spline runtime dependency yet — build the slot + fallback only; dependency approval comes with the scene.
+
+## NON-CODE CHECKLIST FOR WALT (include in report)
+- Create/claim Google Business Profile for Sippi Lights (categories: Party equipment rental service), matching NAP with site footer exactly
+- Set GOOGLE_REVIEW_URL env var from GBP review link
+- Submit sitemap in Google Search Console
+
+## CONFIRMATION GATE
+Report: admin auth locked to owner, all admin actions work, FAQ live with valid FAQPage schema (test with schema validator), all 5 occasion pages live with unique copy, JSON-LD validates, Lighthouse scores reported, Spline slot renders fallback correctly, clean build. Do NOT deploy to production until Walt gives explicit go-ahead.
