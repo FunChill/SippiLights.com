@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { Layout } from './components/Layout'
 import { BuilderProvider } from './context/BuilderContext'
@@ -10,6 +11,11 @@ import Contact from './pages/Contact'
 import Builder from './pages/Builder'
 import Book from './pages/Book'
 import BookConfirmed from './pages/BookConfirmed'
+import Faq from './pages/Faq'
+import Occasion from './pages/Occasion'
+
+// Owner-only page — split out of the customer bundle.
+const Admin = lazy(() => import('./pages/Admin'))
 
 function App() {
   return (
@@ -26,6 +32,18 @@ function App() {
             <Route path="/builder" element={<Builder />} />
             <Route path="/book" element={<Book />} />
             <Route path="/book/confirmed" element={<BookConfirmed />} />
+            <Route path="/faq" element={<Faq />} />
+            <Route path="/rentals/:slug" element={<Occasion />} />
+            <Route
+              path="/admin"
+              element={
+                <Suspense
+                  fallback={<div className="px-6 py-24 text-center text-text-muted">Loading…</div>}
+                >
+                  <Admin />
+                </Suspense>
+              }
+            />
           </Routes>
         </Layout>
       </BuilderProvider>

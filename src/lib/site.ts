@@ -25,6 +25,7 @@ export const NAV_LINKS = [
   { label: 'Word Builder', to: '/builder' },
   { label: 'Portfolio', to: '/portfolio' },
   { label: 'How It Works', to: '/how-it-works' },
+  { label: 'FAQ', to: '/faq' },
   { label: 'About', to: '/about' },
   { label: 'Contact', to: '/contact' },
 ]

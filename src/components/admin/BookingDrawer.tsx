@@ -1,0 +1,230 @@
+import { useEffect, useState } from 'react'
+import { motion } from 'motion/react'
+import type { Booking, BookingStatus } from '../../lib/bookings'
+import { STATUS_LABELS, getAgreementUrl, updateBooking } from '../../lib/bookings'
+import { supabase } from '../../lib/supabaseClient'
+import { formatCurrency } from '../../config/pricing'
+
+const ALL_STATUSES: BookingStatus[] = [
+  'inquiry',
+  'pending_deposit',
+  'confirmed',
+  'completed',
+  'cancelled',
+]
+
+interface BookingDrawerProps {
+  booking: Booking
+  onClose: () => void
+  onChanged: () => void
+}
+
+export function BookingDrawer({ booking, onClose, onChanged }: BookingDrawerProps) {
+  const [notes, setNotes] = useState(booking.notes ?? '')
+  const [status, setStatus] = useState<BookingStatus>(booking.status)
+  const [agreementUrl, setAgreementUrl] = useState<string | null>(null)
+  const [paymentLink, setPaymentLink] = useState<string | null>(null)
+  const [busy, setBusy] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (booking.agreement_pdf_path) {
+      getAgreementUrl(booking.agreement_pdf_path).then(setAgreementUrl)
+    }
+  }, [booking.agreement_pdf_path])
+
+  const run = async (label: string, fn: () => Promise<void>) => {
+    setBusy(label)
+    setError(null)
+    try {
+      await fn()
+      onChanged()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong.')
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  const createPaymentLink = () =>
+    run('link', async () => {
+      const { data: sessionData } = await supabase.auth.getSession()
+      const token = sessionData.session?.access_token
+      const res = await fetch('/api/admin-payment-link', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ bookingId: booking.id }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Could not create payment link.')
+      setPaymentLink(data.url)
+    })
+
+  return (
+    <>
+      <div className="fixed inset-0 z-40 bg-black/50" onClick={onClose} />
+      <motion.div
+        initial={{ x: '100%' }}
+        animate={{ x: 0 }}
+        transition={{ duration: 0.2, ease: 'easeOut' }}
+        className="fixed top-0 right-0 bottom-0 z-50 w-full max-w-md overflow-y-auto border-l border-gold/15 bg-charcoal-2 p-6"
+      >
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="font-headline text-2xl text-gold">
+              {booking.word_built ? `"${booking.word_built}"` : booking.customer_name}
+            </p>
+            <p className="mt-1 text-sm text-text-muted">{booking.event_date}</p>
+          </div>
+          <button type="button" onClick={onClose} className="text-2xl text-text-muted hover:text-warm-white">
+            ×
+          </button>
+        </div>
+
+        <div className="mt-6 flex flex-col gap-2 text-sm">
+          <Row label="Customer" value={booking.customer_name} />
+          <Row label="Phone" value={booking.customer_phone} />
+          <Row label="Email" value={booking.customer_email} />
+          <Row label="Event type" value={booking.event_type ?? '—'} />
+          <Row label="Setup" value={booking.indoor_outdoor ?? '—'} />
+          <Row label="Venue" value={booking.venue_address ?? '—'} />
+          <Row label="LED color" value={booking.led_color ?? '—'} />
+          <Row
+            label="Items"
+            value={
+              booking.items?.length
+                ? booking.items
+                    .map((i) => `${i.character ?? i.itemId}${i.qty > 1 ? ` ×${i.qty}` : ''}`)
+                    .join(', ')
+                : '—'
+            }
+          />
+          <Row label="Subtotal" value={booking.subtotal != null ? formatCurrency(booking.subtotal) : '—'} />
+          <Row
+            label="Deposit"
+            value={`${booking.deposit_due != null ? formatCurrency(booking.deposit_due) : '—'} · ${booking.deposit_paid ? 'PAID' : 'unpaid'}`}
+          />
+        </div>
+
+        <div className="mt-6">
+          <label className="mb-2 block text-xs tracking-wide text-text-muted uppercase">Status</label>
+          <select
+            value={status}
+            onChange={(e) => {
+              const next = e.target.value as BookingStatus
+              setStatus(next)
+              run('status', () => updateBooking(booking.id, { status: next }))
+            }}
+            className="w-full rounded-button border border-gold/20 bg-charcoal px-3 py-2 text-sm text-warm-white"
+          >
+            {ALL_STATUSES.map((s) => (
+              <option key={s} value={s}>
+                {STATUS_LABELS[s]}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          {!booking.deposit_paid && (
+            <ActionButton
+              label={busy === 'link' ? 'Creating…' : 'Get payment link'}
+              onClick={createPaymentLink}
+              disabled={busy !== null}
+            />
+          )}
+          {booking.deposit_paid && booking.status === 'confirmed' && (
+            <ActionButton
+              label={busy === 'balance' ? 'Saving…' : 'Mark balance paid + completed'}
+              onClick={() =>
+                run('balance', () => updateBooking(booking.id, { status: 'completed' }))
+              }
+              disabled={busy !== null}
+            />
+          )}
+          {agreementUrl && (
+            <a
+              href={agreementUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-button border border-gold/40 px-3 py-2 text-xs text-gold hover:bg-gold hover:text-charcoal"
+            >
+              Agreement PDF
+            </a>
+          )}
+        </div>
+
+        {paymentLink && (
+          <div className="mt-4 rounded-button border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-300">
+            <p className="mb-1 font-medium">Payment link — copy and text/email it:</p>
+            <input
+              readOnly
+              value={paymentLink}
+              onFocus={(e) => e.target.select()}
+              className="w-full rounded border border-emerald-500/30 bg-charcoal px-2 py-1.5 text-emerald-200"
+            />
+          </div>
+        )}
+
+        <div className="mt-6">
+          <label className="mb-2 block text-xs tracking-wide text-text-muted uppercase">
+            Notes (cancel/refund details, balance, anything)
+          </label>
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            rows={4}
+            className="w-full rounded-button border border-gold/20 bg-charcoal px-3 py-2 text-sm text-warm-white"
+          />
+          <button
+            type="button"
+            onClick={() => run('notes', () => updateBooking(booking.id, { notes }))}
+            disabled={busy !== null}
+            className="mt-2 rounded-button bg-gold px-4 py-2 text-xs font-medium text-charcoal hover:bg-gold-light disabled:opacity-50"
+          >
+            {busy === 'notes' ? 'Saving…' : 'Save notes'}
+          </button>
+        </div>
+
+        {error && (
+          <p className="mt-4 rounded-button border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-300">
+            {error}
+          </p>
+        )}
+      </motion.div>
+    </>
+  )
+}
+
+function Row({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between gap-4 border-b border-gold/5 pb-2">
+      <span className="text-text-muted">{label}</span>
+      <span className="text-right text-warm-white">{value}</span>
+    </div>
+  )
+}
+
+function ActionButton({
+  label,
+  onClick,
+  disabled,
+}: {
+  label: string
+  onClick: () => void
+  disabled?: boolean
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className="rounded-button bg-gold px-3 py-2 text-xs font-medium text-charcoal hover:bg-gold-light disabled:opacity-50"
+    >
+      {label}
+    </button>
+  )
+}

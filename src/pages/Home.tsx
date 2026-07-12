@@ -2,8 +2,12 @@ import { motion } from 'motion/react'
 import { useSEO } from '../lib/seo'
 import { SITE } from '../lib/site'
 import { Button } from '../components/Button'
-import { ImagePlaceholder } from '../components/ImagePlaceholder'
 import { WordBuilder } from '../components/WordBuilder'
+import { SplineHero } from '../components/SplineHero'
+import { FaqAccordion } from '../components/FaqAccordion'
+import { FAQ_ITEMS } from '../content/faq'
+import { Link } from 'react-router-dom'
+import { useJsonLd, LOCAL_BUSINESS_SCHEMA } from '../lib/jsonld'
 
 const SERVICES = [
   {
@@ -55,6 +59,7 @@ export default function Home() {
     description:
       'Marquee letters, numbers, LED uplighting and stages for birthdays, weddings, and every celebration in Jackson, MS. Free delivery within 25 miles.',
   })
+  useJsonLd([LOCAL_BUSINESS_SCHEMA])
 
   return (
     <>
@@ -106,10 +111,7 @@ export default function Home() {
             className="relative"
           >
             <div className="glow-gold" />
-            <ImagePlaceholder
-              label="Sippi Lights marquee photo"
-              className="relative aspect-[4/5] w-full"
-            />
+            <SplineHero className="aspect-[4/5] w-full" />
           </motion.div>
         </div>
       </section>
@@ -190,6 +192,24 @@ export default function Home() {
           <p className="mt-4 text-text-muted">
             Proudly serving {SITE.serviceCities.join(', ')}, and surrounding
             communities.
+          </p>
+        </div>
+      </section>
+
+      {/* FAQ preview */}
+      <section className="border-t border-gold/10 px-6 py-20 lg:px-10">
+        <div className="mx-auto max-w-3xl">
+          <h2 className="font-headline text-3xl font-light lg:text-4xl">
+            Quick Answers
+          </h2>
+          <div className="mt-8">
+            <FaqAccordion items={FAQ_ITEMS.slice(0, 5)} />
+          </div>
+          <p className="mt-6 text-sm text-text-muted">
+            More questions?{' '}
+            <Link to="/faq" className="text-gold hover:text-gold-light">
+              See the full FAQ →
+            </Link>
           </p>
         </div>
       </section>
