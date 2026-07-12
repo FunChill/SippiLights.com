@@ -41,6 +41,8 @@ interface CheckoutBody {
   venueAddress?: string
   zip?: string
   notes?: string | null
+  agreementName?: string
+  agreementVersion?: string
 }
 
 export default async function handler(req: ApiRequest, res: ApiResponse) {
@@ -61,6 +63,8 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     venueAddress,
     zip,
     notes,
+    agreementName,
+    agreementVersion,
   } = (req.body ?? {}) as CheckoutBody
 
   if (
@@ -72,6 +76,10 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     items.length === 0
   ) {
     return res.status(400).json({ error: 'Missing required booking fields.' })
+  }
+
+  if (!agreementName || !agreementVersion) {
+    return res.status(400).json({ error: 'Rental agreement must be accepted before payment.' })
   }
 
   const requestedItems: RequestedItemInput[] = items.map((i) => ({
@@ -171,6 +179,9 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       subtotal: marqueeSubtotal,
       deposit_due: depositDue,
       notes: notes ?? null,
+      agreement_accepted_at: new Date().toISOString(),
+      agreement_name: agreementName,
+      agreement_version: agreementVersion,
     })
     .select()
     .single()

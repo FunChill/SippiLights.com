@@ -92,6 +92,22 @@ export default function Contact() {
         notes: data.get('message') || null,
       })
       if (error) throw error
+
+      // Fire-and-forget: auto-reply + owner notification. The inquiry row is
+      // already saved — email hiccups must not fail the submission.
+      fetch('/api/notify-inquiry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerName: data.get('name'),
+          customerEmail: data.get('email'),
+          eventDate,
+          eventType: data.get('eventType'),
+          services: selectedServices,
+          message: data.get('message') || undefined,
+        }),
+      }).catch(() => {})
+
       setSubmitStatus('success')
     } catch {
       setSubmitStatus('error')

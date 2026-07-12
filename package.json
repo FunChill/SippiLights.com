@@ -10,12 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@react-pdf/renderer": "^4.5.1",
     "@stripe/stripe-js": "^9.9.0",
     "@supabase/supabase-js": "^2.110.1",
     "motion": "^12.42.2",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-router-dom": "^7.18.1",
+    "resend": "^6.17.2",
     "stripe": "^22.3.0"
   },
   "devDependencies": {

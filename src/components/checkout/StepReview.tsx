@@ -6,12 +6,15 @@ import { getCharPrice } from '../../data/inventory'
 import { calculateDeposit, formatCurrency } from '../../config/pricing'
 import { ADD_ON_LABELS } from '../../config/addOns'
 import { saveDraft } from '../../lib/checkoutDraft'
+import { AGREEMENT_VERSION } from '../../content/rental-agreement'
+import { AgreementBox } from './AgreementBox'
 import { StepNav } from './StepNav'
 
 export function StepReview() {
   const checkout = useCheckout()
   const { word, color, numberFinish } = useBuilder()
   const [submitState, setSubmitState] = useState<'idle' | 'submitting' | 'error'>('idle')
+  const [agreementAccepted, setAgreementAccepted] = useState(false)
 
   const requestedItems = wordToRequestedItems(word, numberFinish)
   const marqueeCount = requestedItems.reduce((sum, r) => sum + r.qty, 0)
@@ -78,6 +81,8 @@ export function StepReview() {
                   .map((k) => ADD_ON_LABELS[k])
                   .join(', ')}`
               : null,
+          agreementName: checkout.name,
+          agreementVersion: AGREEMENT_VERSION,
         }),
       })
 
@@ -131,6 +136,12 @@ export function StepReview() {
         </div>
       </div>
 
+      <AgreementBox
+        accepted={agreementAccepted}
+        onAcceptedChange={setAgreementAccepted}
+        customerName={checkout.name}
+      />
+
       {submitState === 'error' && (
         <p className="mt-4 rounded-button border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
           Something went wrong starting checkout. Please try again, or call/text
@@ -142,7 +153,7 @@ export function StepReview() {
         onBack={() => checkout.setStep(4)}
         onNext={handleReserve}
         nextLabel={submitState === 'submitting' ? 'Redirecting…' : 'Reserve My Date'}
-        nextDisabled={submitState === 'submitting'}
+        nextDisabled={submitState === 'submitting' || !agreementAccepted}
       />
     </div>
   )

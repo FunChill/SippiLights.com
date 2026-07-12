@@ -1,6 +1,7 @@
 {
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
   "crons": [
-    { "path": "/api/release-abandoned-bookings", "schedule": "*/15 * * * *" }
+    { "path": "/api/release-abandoned-bookings", "schedule": "*/15 * * * *" },
+    { "path": "/api/daily-emails", "schedule": "0 14 * * *" }
   ]
 }
