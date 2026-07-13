@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import Stripe from 'stripe'
-import { MARQUEE_PRICE, calculateDeposit } from '../src/config/pricing'
+import { MARQUEE_PRICE, calculateDeposit } from '../src/config/pricing.js'
 
 // Loosely typed instead of depending on @vercel/node — this file isn't part
 // of the Vite/tsc build (only src/ is), and Vercel's Node runtime supplies

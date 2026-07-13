@@ -1,6 +1,6 @@
 import { createElement as h } from 'react'
 import { Document, Page, Text, View, StyleSheet, renderToBuffer } from '@react-pdf/renderer'
-import { AGREEMENT_INTRO, RENTAL_AGREEMENT } from '../../src/content/rental-agreement'
+import { AGREEMENT_INTRO, RENTAL_AGREEMENT } from '../../src/content/rental-agreement.js'
 
 const styles = StyleSheet.create({
   page: { padding: 48, fontSize: 10, fontFamily: 'Helvetica', color: '#1C1B19' },

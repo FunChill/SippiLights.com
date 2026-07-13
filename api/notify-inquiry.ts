@@ -1,4 +1,4 @@
-import { sendInquiryAutoReply, sendOwnerInquiryNotification } from './_lib/emails'
+import { sendInquiryAutoReply, sendOwnerInquiryNotification } from './_lib/emails.js'
 
 interface ApiRequest {
   method?: string

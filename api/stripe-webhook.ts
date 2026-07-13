@@ -1,7 +1,7 @@
 import Stripe from 'stripe'
-import { supabaseAdmin } from './_lib/supabaseAdmin'
-import { generateAgreementPdf } from './_lib/agreementPdf'
-import { sendConfirmationEmail } from './_lib/emails'
+import { supabaseAdmin } from './_lib/supabaseAdmin.js'
+import { generateAgreementPdf } from './_lib/agreementPdf.js'
+import { sendConfirmationEmail } from './_lib/emails.js'
 
 // Raw body required for Stripe signature verification — disable the
 // platform's default JSON body parsing for this route.

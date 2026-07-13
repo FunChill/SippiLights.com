@@ -1,6 +1,6 @@
 import Stripe from 'stripe'
-import { supabaseAdmin } from './_lib/supabaseAdmin'
-import { MARQUEE_PRICE, calculateDeposit } from '../src/config/pricing'
+import { supabaseAdmin } from './_lib/supabaseAdmin.js'
+import { MARQUEE_PRICE, calculateDeposit } from '../src/config/pricing.js'
 
 interface ApiRequest {
   method?: string

@@ -1,5 +1,5 @@
-import { supabaseAdmin } from './_lib/supabaseAdmin'
-import { sendReminderEmail, sendThankYouEmail } from './_lib/emails'
+import { supabaseAdmin } from './_lib/supabaseAdmin.js'
+import { sendReminderEmail, sendThankYouEmail } from './_lib/emails.js'
 
 interface ApiRequest {
   method?: string
