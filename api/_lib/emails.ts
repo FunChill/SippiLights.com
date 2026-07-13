@@ -1,6 +1,9 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Fallback prevents Resend SDK from throwing at module load when the env var
+// isn't set yet — the actual send() call will return a 401 instead of crashing
+// the entire Vercel function at import time.
+const resend = new Resend(process.env.RESEND_API_KEY || 'not-configured')
 
 // Until the sippilights.com domain is verified in Resend, the free tier only
 // delivers from onboarding@resend.dev (and only to the account owner's own

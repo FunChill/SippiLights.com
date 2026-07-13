@@ -20,7 +20,10 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY as string,
 )
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string)
+// Fallback prevents Stripe SDK from throwing at module load when the env var
+// isn't set — the actual API call will return a 401 instead of crashing the
+// Vercel function runtime at import time.
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'not-configured')
 
 interface RequestedItemInput {
   character: string
