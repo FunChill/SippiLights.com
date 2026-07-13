@@ -13,6 +13,7 @@ import Book from './pages/Book'
 import BookConfirmed from './pages/BookConfirmed'
 import Faq from './pages/Faq'
 import Occasion from './pages/Occasion'
+import Feedback from './pages/Feedback'
 
 // Owner-only page — split out of the customer bundle.
 const Admin = lazy(() => import('./pages/Admin'))
@@ -34,8 +35,9 @@ function App() {
             <Route path="/book/confirmed" element={<BookConfirmed />} />
             <Route path="/faq" element={<Faq />} />
             <Route path="/rentals/:slug" element={<Occasion />} />
+            <Route path="/feedback/:token" element={<Feedback />} />
             <Route
-              path="/admin"
+              path="/admin/*"
               element={
                 <Suspense
                   fallback={<div className="px-6 py-24 text-center text-text-muted">Loading…</div>}

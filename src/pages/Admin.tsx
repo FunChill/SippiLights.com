@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { NavLink, Route, Routes } from 'react-router-dom'
 import type { Session } from '@supabase/supabase-js'
 import { useSEO } from '../lib/seo'
 import { supabase } from '../lib/supabaseClient'
@@ -11,6 +12,12 @@ import {
 } from '../lib/bookings'
 import { BookingDrawer } from '../components/admin/BookingDrawer'
 import { QuickActions } from '../components/admin/QuickActions'
+import { ReviewsWidget } from '../components/admin/ReviewsWidget'
+import Financials from './admin/Financials'
+import Assets from './admin/Assets'
+import Playbook from './admin/Playbook'
+import Transfer from './admin/Transfer'
+import Export from './admin/Export'
 
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -40,7 +47,65 @@ export default function Admin() {
     return <div className="px-6 py-24 text-center text-text-muted">Loading…</div>
   }
 
-  return session ? <Dashboard /> : <LoginForm />
+  return session ? <AdminShell /> : <LoginForm />
+}
+
+const ADMIN_TABS = [
+  { to: '/admin', label: 'Dashboard', end: true },
+  { to: '/admin/financials', label: 'Financials' },
+  { to: '/admin/inventory', label: 'Inventory & Assets' },
+  { to: '/admin/playbook', label: 'Playbook' },
+  { to: '/admin/transfer', label: 'Transfer' },
+  { to: '/admin/export', label: 'Data Room' },
+]
+
+function AdminShell() {
+  return (
+    <div className="px-4 py-10 lg:px-10">
+      <div className="mx-auto max-w-6xl">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <h1 className="font-headline text-3xl font-light">Owner Dashboard</h1>
+          <button
+            type="button"
+            onClick={() => supabase.auth.signOut()}
+            className="text-sm text-text-muted hover:text-warm-white"
+          >
+            Sign out
+          </button>
+        </div>
+
+        <nav className="mt-6 flex flex-wrap gap-2 border-b border-gold/10 pb-3">
+          {ADMIN_TABS.map((tab) => (
+            <NavLink
+              key={tab.to}
+              to={tab.to}
+              end={tab.end}
+              className={({ isActive }) =>
+                `rounded-button px-3 py-1.5 text-xs ${
+                  isActive
+                    ? 'bg-gold font-medium text-charcoal'
+                    : 'border border-gold/20 text-text-muted hover:border-gold/50 hover:text-warm-white'
+                }`
+              }
+            >
+              {tab.label}
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="mt-6">
+          <Routes>
+            <Route index element={<Dashboard />} />
+            <Route path="financials" element={<Financials />} />
+            <Route path="inventory" element={<Assets />} />
+            <Route path="playbook" element={<Playbook />} />
+            <Route path="transfer" element={<Transfer />} />
+            <Route path="export" element={<Export />} />
+          </Routes>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 function LoginForm() {
@@ -135,20 +200,9 @@ function Dashboard() {
   }
 
   return (
-    <div className="px-4 py-10 lg:px-10">
-      <div className="mx-auto max-w-6xl">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <h1 className="font-headline text-3xl font-light">Dashboard</h1>
-          <button
-            type="button"
-            onClick={() => supabase.auth.signOut()}
-            className="text-sm text-text-muted hover:text-warm-white"
-          >
-            Sign out
-          </button>
-        </div>
-
-        <div className="mt-8 grid gap-8 lg:grid-cols-[1.6fr_1fr]">
+    <div>
+      <div>
+        <div className="grid gap-8 lg:grid-cols-[1.6fr_1fr]">
           <div>
             {/* Calendar */}
             <div className="rounded-card border border-gold/10 bg-charcoal-2 p-4">
@@ -280,7 +334,10 @@ function Dashboard() {
             </div>
           </div>
 
-          <QuickActions onChanged={refresh} />
+          <div className="flex flex-col gap-6">
+            <QuickActions onChanged={refresh} />
+            <ReviewsWidget />
+          </div>
         </div>
       </div>
 

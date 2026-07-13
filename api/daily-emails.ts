@@ -86,6 +86,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
         subtotal: booking.subtotal,
         depositDue: booking.deposit_due,
         venueAddress: booking.venue_address,
+        feedbackToken: booking.feedback_token,
       })
       await supabaseAdmin
         .from('bookings')

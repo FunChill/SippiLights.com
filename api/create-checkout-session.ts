@@ -142,6 +142,18 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     const owned = ownedMap.get(key) ?? 0
     const booked = bookedMap.get(key) ?? 0
     if (owned - booked < item.qty) {
+      // Demand signal: a customer got all the way to checkout and lost the
+      // item — the strongest possible "buy more of these" evidence.
+      await supabaseAdmin.from('demand_signals').upsert(
+        {
+          date: eventDate,
+          char_value: item.character,
+          finish: item.finish,
+          requested_qty: item.qty,
+          available_qty: Math.max(0, owned - booked),
+        },
+        { onConflict: 'date,char_value,finish,logged_on', ignoreDuplicates: true },
+      )
       return res.status(409).json({
         error: `"${item.character}" is no longer available for that date. Please go back and check availability again.`,
       })

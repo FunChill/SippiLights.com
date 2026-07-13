@@ -21,6 +21,7 @@ interface BookingEmailData {
   subtotal: number | null
   depositDue: number | null
   venueAddress: string | null
+  feedbackToken?: string | null
 }
 
 function firstName(name: string): string {
@@ -98,6 +99,7 @@ export async function sendThankYouEmail(d: BookingEmailData): Promise<void> {
     html: layout(`
       <p>Hey ${firstName(d.customerName)},</p>
       <p>Hope your celebration was everything you wanted it to be — we loved being part of it.</p>
+      ${d.feedbackToken ? `<p>Got two minutes? <a href="https://sippilights.com/feedback/${d.feedbackToken}" style="color:#8a6d2f"><strong>Tell us how we did</strong></a> — your feedback shapes every event we light up next.</p>` : ''}
       ${REVIEW_URL ? `<p>If the lights made your moment, a quick review means the world to a local business like ours: <a href="${REVIEW_URL}" style="color:#8a6d2f">leave a review</a>.</p>` : ''}
       <p>Next birthday, wedding, or graduation on the calendar? <a href="https://sippilights.com/book" style="color:#8a6d2f">Your next date is one click away</a> — the good ones go fast.</p>
     `),

@@ -158,6 +158,36 @@ export async function checkAvailability(
   }
 }
 
+/**
+ * Fire-and-forget demand logging: whenever a check finds items unavailable,
+ * tell the server so the owner sees what to buy next. Server dedupes to one
+ * row per item per day, so calling this on every check is safe.
+ */
+export function logDemandSignals(result: AvailabilityResult): void {
+  if (result.blocked) return
+  const misses = result.items.filter((i) => !i.available)
+  if (misses.length === 0) return
+
+  const payload = {
+    date: result.date,
+    signals: misses.map((m) => ({
+      character: m.character,
+      finish: m.finish,
+      requestedQty: m.qty,
+      availableQty: Math.max(0, m.ownedQty - m.bookedQty),
+    })),
+  }
+
+  fetch('/api/log-demand', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    keepalive: true,
+  }).catch(() => {
+    /* buying signal, not an audit log — losses are fine */
+  })
+}
+
 function daysUntil(dateStr: string): number {
   const target = new Date(`${dateStr}T00:00:00`)
   const today = new Date()
