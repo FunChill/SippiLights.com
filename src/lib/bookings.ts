@@ -34,6 +34,8 @@ export interface Booking {
   deposit_paid: boolean
   notes: string | null
   agreement_pdf_path: string | null
+  balance_collected_at: string | null
+  balance_payment_method: 'cash' | 'card' | 'other' | null
 }
 
 export const STATUS_COLORS: Record<BookingStatus, string> = {

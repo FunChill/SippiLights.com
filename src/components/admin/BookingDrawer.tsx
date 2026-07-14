@@ -22,6 +22,7 @@ interface BookingDrawerProps {
 export function BookingDrawer({ booking, onClose, onChanged }: BookingDrawerProps) {
   const [notes, setNotes] = useState(booking.notes ?? '')
   const [status, setStatus] = useState<BookingStatus>(booking.status)
+  const [balanceMethod, setBalanceMethod] = useState<'cash' | 'card' | 'other'>('cash')
   const [agreementUrl, setAgreementUrl] = useState<string | null>(null)
   const [paymentLink, setPaymentLink] = useState<string | null>(null)
   const [busy, setBusy] = useState<string | null>(null)
@@ -107,6 +108,16 @@ export function BookingDrawer({ booking, onClose, onChanged }: BookingDrawerProp
             label="Deposit"
             value={`${booking.deposit_due != null ? formatCurrency(booking.deposit_due) : '—'} · ${booking.deposit_paid ? 'PAID' : 'unpaid'}`}
           />
+          <Row
+            label="Balance"
+            value={
+              booking.balance_collected_at
+                ? `COLLECTED ${booking.balance_collected_at.slice(0, 10)} (${booking.balance_payment_method ?? '—'})`
+                : booking.subtotal != null && booking.deposit_due != null
+                  ? `${formatCurrency(booking.subtotal - booking.deposit_due)} due at delivery`
+                  : '—'
+            }
+          />
         </div>
 
         <div className="mt-6">
@@ -136,14 +147,32 @@ export function BookingDrawer({ booking, onClose, onChanged }: BookingDrawerProp
               disabled={busy !== null}
             />
           )}
-          {booking.deposit_paid && booking.status === 'confirmed' && (
-            <ActionButton
-              label={busy === 'balance' ? 'Saving…' : 'Mark balance paid + completed'}
-              onClick={() =>
-                run('balance', () => updateBooking(booking.id, { status: 'completed' }))
-              }
-              disabled={busy !== null}
-            />
+          {booking.deposit_paid && booking.status === 'confirmed' && !booking.balance_collected_at && (
+            <div className="flex items-center gap-2">
+              <select
+                value={balanceMethod}
+                onChange={(e) => setBalanceMethod(e.target.value as 'cash' | 'card' | 'other')}
+                className="rounded-button border border-gold/20 bg-charcoal px-2 py-2 text-xs text-warm-white"
+                aria-label="Balance payment method"
+              >
+                <option value="cash">Cash</option>
+                <option value="card">Card</option>
+                <option value="other">Other</option>
+              </select>
+              <ActionButton
+                label={busy === 'balance' ? 'Saving…' : 'Balance collected + completed'}
+                onClick={() =>
+                  run('balance', () =>
+                    updateBooking(booking.id, {
+                      status: 'completed',
+                      balance_collected_at: new Date().toISOString(),
+                      balance_payment_method: balanceMethod,
+                    }),
+                  )
+                }
+                disabled={busy !== null}
+              />
+            </div>
           )}
           {agreementUrl && (
             <a
