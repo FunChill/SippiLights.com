@@ -7,6 +7,7 @@ import { wordToRequestedItems } from '../lib/availability'
 import { MarqueeChar } from './MarqueeChar'
 import { AvailabilityStatus } from './AvailabilityStatus'
 import { Button } from './Button'
+import { trackBuilderUsed } from '../lib/analytics'
 
 interface WordBuilderProps {
   compact?: boolean
@@ -37,6 +38,7 @@ export function WordBuilder({
     const cleaned = raw.replace(/[^A-Za-z0-9 ]/g, '')
     setHadInvalidChar(cleaned.length !== raw.length)
     setWord(cleaned)
+    if (cleaned.trim()) trackBuilderUsed()
   }
 
   const chars = word.split('')

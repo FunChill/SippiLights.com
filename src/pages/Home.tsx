@@ -5,6 +5,7 @@ import { Button } from '../components/Button'
 import { WordBuilder } from '../components/WordBuilder'
 import { SplineHero } from '../components/SplineHero'
 import { FaqAccordion } from '../components/FaqAccordion'
+import { Testimonials } from '../components/Testimonials'
 import { FAQ_ITEMS } from '../content/faq'
 import { Link } from 'react-router-dom'
 import { useJsonLd, LOCAL_BUSINESS_SCHEMA } from '../lib/jsonld'
@@ -195,6 +196,9 @@ export default function Home() {
           </p>
         </div>
       </section>
+
+      {/* Customer reviews — real, moderated; never placeholder content */}
+      <Testimonials limit={6} />
 
       {/* FAQ preview */}
       <section className="border-t border-gold/10 px-6 py-20 lg:px-10">

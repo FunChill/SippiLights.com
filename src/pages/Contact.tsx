@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabaseClient'
 import { wordToRequestedItems } from '../lib/availability'
 import { getCharPrice } from '../data/inventory'
 import { AvailabilityStatus } from '../components/AvailabilityStatus'
+import { trackInquirySubmitted } from '../lib/analytics'
 
 const EVENT_TYPES = [
   'Birthday',
@@ -108,6 +109,7 @@ export default function Contact() {
         }),
       }).catch(() => {})
 
+      trackInquirySubmitted()
       setSubmitStatus('success')
     } catch {
       setSubmitStatus('error')

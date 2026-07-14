@@ -1,20 +1,39 @@
 import { useEffect, useMemo, useState } from 'react'
-import { fetchReviews, lastMonthKeys, type Review } from '../../lib/phase7'
+import { fetchReviews, lastMonthKeys, setReviewDisplayStatus, type Review } from '../../lib/phase7'
 
 /**
- * Dashboard feedback widget: average rating trend (6 months), recent feed,
- * and low ratings (below 4) flagged for owner follow-up.
+ * Dashboard feedback widget: moderation queue (approve/hide — text is NEVER
+ * editable), average rating trend (6 months), recent feed, and low ratings
+ * (below 4) flagged for owner follow-up.
  */
 export function ReviewsWidget() {
   const [reviews, setReviews] = useState<Review[]>([])
   const [loaded, setLoaded] = useState(false)
+  const [busy, setBusy] = useState<string | null>(null)
 
-  useEffect(() => {
+  const reload = () => {
     fetchReviews()
       .then(setReviews)
       .catch(() => setReviews([]))
       .finally(() => setLoaded(true))
-  }, [])
+  }
+  useEffect(reload, [])
+
+  const moderate = async (id: string, status: 'approved' | 'hidden') => {
+    setBusy(id)
+    try {
+      await setReviewDisplayStatus(id, status)
+      reload()
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  // Only shareable reviews enter the public queue; the rest are private feedback.
+  const queue = useMemo(
+    () => reviews.filter((r) => r.display_status === 'pending' && r.permission_to_share),
+    [reviews],
+  )
 
   const avg = useMemo(
     () => (reviews.length ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : 0),
@@ -48,6 +67,41 @@ export function ReviewsWidget() {
         </p>
       ) : (
         <>
+          {queue.length > 0 && (
+            <div className="mt-3 rounded-button border border-gold/30 bg-gold/5 p-3">
+              <p className="text-[10px] tracking-wide text-gold uppercase">
+                Publish queue — {queue.length} awaiting your call
+              </p>
+              {queue.map((r) => (
+                <div key={r.id} className="mt-2 border-t border-gold/10 pt-2 first:border-0">
+                  <div className="flex items-center justify-between text-xs">
+                    <Stars value={r.rating} />
+                    <span className="text-text-muted">{r.submitted_at.slice(0, 10)}</span>
+                  </div>
+                  <p className="mt-1 text-xs text-warm-white/90">{r.feedback_text}</p>
+                  <div className="mt-2 flex gap-2">
+                    <button
+                      type="button"
+                      disabled={busy !== null}
+                      onClick={() => moderate(r.id, 'approved')}
+                      className="rounded-button bg-gold px-3 py-1 text-[11px] font-medium text-charcoal hover:bg-gold-light disabled:opacity-50"
+                    >
+                      {busy === r.id ? '…' : 'Approve for website'}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={busy !== null}
+                      onClick={() => moderate(r.id, 'hidden')}
+                      className="rounded-button border border-gold/30 px-3 py-1 text-[11px] text-text-muted hover:text-warm-white disabled:opacity-50"
+                    >
+                      Hide
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="mt-3 flex items-baseline gap-2">
             <span className="font-headline text-3xl text-gold">{avg.toFixed(1)}</span>
             <Stars value={Math.round(avg)} />
@@ -86,7 +140,13 @@ export function ReviewsWidget() {
                   <Stars value={r.rating} />
                   <span className="text-text-muted">
                     {r.submitted_at.slice(0, 10)}
-                    {r.permission_to_share ? ' · shareable' : ''}
+                    {r.permission_to_share
+                      ? r.display_status === 'approved'
+                        ? ' · live on site'
+                        : r.display_status === 'hidden'
+                          ? ' · hidden'
+                          : ' · in queue'
+                      : ' · private'}
                   </span>
                 </div>
                 <p className="mt-1 text-warm-white/85">

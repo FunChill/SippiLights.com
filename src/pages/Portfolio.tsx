@@ -1,4 +1,5 @@
 import { useSEO } from '../lib/seo'
+import { Testimonials } from '../components/Testimonials'
 
 const GALLERY = [
   'Birthday Celebration',
@@ -52,6 +53,9 @@ export default function Portfolio() {
           ))}
         </div>
       </div>
+
+      {/* Customer reviews — real, moderated; never placeholder content */}
+      <Testimonials limit={9} />
     </div>
   )
 }
