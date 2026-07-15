@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { checkAvailability, describeConflicts, logDemandSignals } from '../lib/availability'
+import { trackAvailabilityChecked } from '../lib/analytics'
 import type { RequestedItem, AvailabilityResult } from '../lib/availability'
 
 interface AvailabilityStatusProps {
@@ -37,6 +38,7 @@ export function AvailabilityStatus({ date, requestedItems }: AvailabilityStatusP
         setResult(r)
         setStatus('ready')
         logDemandSignals(r)
+        trackAvailabilityChecked(r.allAvailable && !r.blocked)
       })
       .catch(() => {
         if (cancelled) return

@@ -1,12 +1,18 @@
+import { useEffect } from 'react'
 import { useSEO } from '../lib/seo'
 import { Button } from '../components/Button'
 import { SITE } from '../lib/site'
+import { trackBookingCompleted } from '../lib/analytics'
 
 export default function BookConfirmed() {
   useSEO({
     title: 'Booking Confirmed | Sippi Lights',
     description: 'Your Sippi Lights deposit was received and your date is reserved.',
   })
+
+  useEffect(() => {
+    trackBookingCompleted()
+  }, [])
 
   return (
     <div className="px-6 py-24 lg:px-10">

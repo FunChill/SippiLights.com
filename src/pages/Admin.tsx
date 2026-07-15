@@ -65,13 +65,23 @@ function AdminShell() {
       <div className="mx-auto max-w-6xl">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <h1 className="font-headline text-3xl font-light">Owner Dashboard</h1>
-          <button
-            type="button"
-            onClick={() => supabase.auth.signOut()}
-            className="text-sm text-text-muted hover:text-warm-white"
-          >
-            Sign out
-          </button>
+          <div className="flex items-center gap-4">
+            <a
+              href="https://vercel.com/luxaurum-ventures-projects/sippi-lights-com/analytics"
+              target="_blank"
+              rel="noreferrer"
+              className="text-sm text-gold hover:underline"
+            >
+              View Analytics ↗
+            </a>
+            <button
+              type="button"
+              onClick={() => supabase.auth.signOut()}
+              className="text-sm text-text-muted hover:text-warm-white"
+            >
+              Sign out
+            </button>
+          </div>
         </div>
 
         <nav className="mt-6 flex flex-wrap gap-2 border-b border-gold/10 pb-3">

@@ -86,6 +86,7 @@ export interface Review {
   feedback_text: string
   submitted_at: string
   permission_to_share: boolean
+  display_status: 'pending' | 'approved' | 'hidden'
 }
 
 export async function fetchReviews(): Promise<Review[]> {
@@ -95,6 +96,21 @@ export async function fetchReviews(): Promise<Review[]> {
     .order('submitted_at', { ascending: false })
   if (error) throw error
   return (data ?? []) as Review[]
+}
+
+/**
+ * Moderation is approve/hide ONLY — review text is never editable, so this
+ * helper can only touch display_status.
+ */
+export async function setReviewDisplayStatus(
+  id: string,
+  displayStatus: 'approved' | 'hidden',
+): Promise<void> {
+  const { error } = await supabase
+    .from('reviews')
+    .update({ display_status: displayStatus })
+    .eq('id', id)
+  if (error) throw error
 }
 
 // ---------------------------------------------------------------------------

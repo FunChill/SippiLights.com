@@ -9,6 +9,7 @@ import { saveDraft } from '../../lib/checkoutDraft'
 import { AGREEMENT_VERSION } from '../../content/rental-agreement'
 import { AgreementBox } from './AgreementBox'
 import { StepNav } from './StepNav'
+import { trackCheckoutStarted } from '../../lib/analytics'
 
 export function StepReview() {
   const checkout = useCheckout()
@@ -31,6 +32,7 @@ export function StepReview() {
 
   const handleReserve = async () => {
     setSubmitState('submitting')
+    trackCheckoutStarted()
 
     // Persisted so a Stripe cancel (a full page reload) can restore Step 5
     // with the order intact instead of dropping the customer back to blank.
