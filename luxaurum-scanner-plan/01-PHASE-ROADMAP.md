@@ -39,16 +39,18 @@ App lives in its own new repo (`luxaurum/aurumscan` or similar) from Phase 1. Th
 - Result caching per (product, profile-hash) to control API cost
 - ✅ Accept: photo-scan a curved shampoo bottle and a boxed food in a real store; correct extraction + personalized cited breakdown. **This is the first shareable TestFlight build.**
 
-## PHASE 5 — Household Mode + Ask-the-Label Chat + Better-Swap Engine
+## PHASE 5 — Household Mode + Ask-the-Label Chat + Compare Mode + Better-Swap Engine
 **Goal:** the differentiators nobody else has.
 - Multiple household profiles; "scan as" switcher; per-member score chips on one scan
 - Chat screen with scan context loaded (Claude, streamed, guardrailed: educational only, provider-referral line on pregnancy/child topics)
+- **Compare Mode (Tier 1):** scan 2–3 items sequentially (barcode or label photo) → ranked verdict card, personalized to active profile — "Option B is best for you" — with per-item flag summaries and swap links; comparisons saved to history
 - Alternatives engine: 3 cleaner same-category swaps via Open Facts category data + affiliate link wrapper
-- ✅ Accept: one scan shows different verdicts for two household members; chat answers product questions with context; flagged product shows 3 swaps
+- ✅ Accept: one scan shows different verdicts for two household members; chat answers product questions with context; a 3-item in-store comparison returns a correct, cited ranking; flagged product shows 3 swaps
 
-## PHASE 6 — Monetization + History/Insights + Polish
+## PHASE 6 — Monetization + Shelf Shot + History/Insights + Polish
 **Goal:** it makes money and retains.
-- RevenueCat: free tier (5 scans/day, 1 profile) vs Premium (unlimited, chat, household, swaps, insights); paywall screens; restore purchases
+- RevenueCat: free tier (5 scans/day, 1 profile) vs Premium (unlimited, chat, household, Compare Mode/Shelf Shot, swaps, insights); paywall screens; restore purchases
+- **Shelf Shot (Compare Tier 2):** one group photo of 2–3 shelf products → Claude vision identifies each; low-confidence products get a "tap to confirm" picker; feeds the same Compare verdict card. Ship behind a feature flag; only promote once accuracy is proven in real stores
 - Insights tab: recurring flagged ingredients, exposure trends, monthly household report
 - Empty states, error states, haptics, animations, app icon, splash
 - ✅ Accept: sandbox purchase completes on both platforms; gates enforce correctly
