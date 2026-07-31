@@ -106,6 +106,41 @@ export async function sendThankYouEmail(d: BookingEmailData): Promise<void> {
   })
 }
 
+/**
+ * Customer built a full order at checkout but wasn't ready to commit to the
+ * date. Confirms we've got it, without pressure — the nudge comes later.
+ */
+export async function sendInquirySavedEmail(d: BookingEmailData): Promise<void> {
+  await resend.emails.send({
+    from: FROM,
+    to: d.customerEmail,
+    subject: `We saved your ${d.wordBuilt ? `"${d.wordBuilt}" ` : ''}setup — no rush`,
+    html: layout(`
+      <p>Hey ${firstName(d.customerName)},</p>
+      <p>Your setup is saved and we've got your details — nothing's booked yet, and nothing's owed. When your date is firm, we'll pick right back up here.</p>
+      ${orderSummary(d)}
+      <p>Two things worth knowing: dates are held only by a deposit, and weekends in peak season go early. When you're ready, <a href="https://sippilights.com/book" style="color:#8a6d2f">lock it in here</a>.</p>
+      <p>Questions before then? Call or text — happy to help you think it through.</p>
+    `),
+  })
+}
+
+/** One nudge, 14 days after the customer saved an unconfirmed setup. */
+export async function sendInquiryNudgeEmail(d: BookingEmailData): Promise<void> {
+  await resend.emails.send({
+    from: FROM,
+    to: d.customerEmail,
+    subject: `Still thinking about ${d.eventDate}?`,
+    html: layout(`
+      <p>Hey ${firstName(d.customerName)},</p>
+      <p>Checking in on the ${d.wordBuilt ? `<strong>"${d.wordBuilt}"</strong> ` : ''}setup you had us save. Is your date settled yet?</p>
+      ${orderSummary(d)}
+      <p>If it is, <a href="https://sippilights.com/book" style="color:#8a6d2f">reserve it here</a> — a deposit is all it takes to lock the date and your pieces.</p>
+      <p>If plans changed or you need something different, just reply or text us. Either way, no pressure — we'd just hate for you to lose the date.</p>
+    `),
+  })
+}
+
 export async function sendInquiryAutoReply(customerName: string, customerEmail: string): Promise<void> {
   await resend.emails.send({
     from: FROM,

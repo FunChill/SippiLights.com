@@ -5,6 +5,8 @@ import {
   FREE_DELIVERY_RADIUS_MI,
   MAX_RADIUS_MI,
   MIN_MARQUEES_OUTSIDE_25,
+  TRAVEL_FEE_BEYOND_25,
+  formatCurrency,
   getDeliveryZone,
 } from '../../config/pricing'
 import { StepNav } from './StepNav'
@@ -20,6 +22,10 @@ export function StepLogistics() {
     setWeatherAck,
     venueAddress,
     setVenueAddress,
+    city,
+    setCity,
+    state,
+    setState,
     zip,
     setZip,
     setStep,
@@ -38,6 +44,8 @@ export function StepLogistics() {
     indoorOutdoor !== '' &&
     (indoorOutdoor === 'indoor' || weatherAck) &&
     venueAddress.trim() !== '' &&
+    city.trim() !== '' &&
+    state.trim().length === 2 &&
     zip.length === 5 &&
     !blockedByArea &&
     !blockedByMinimum
@@ -99,25 +107,58 @@ export function StepLogistics() {
           type="text"
           value={venueAddress}
           onChange={(e) => setVenueAddress(e.target.value)}
-          placeholder="Street address, city"
+          placeholder="Street address"
+          autoComplete="street-address"
           className={inputClass}
         />
       </div>
 
-      <div className="mt-5 max-w-[10rem]">
-        <label htmlFor="zip" className="mb-2 block text-xs tracking-wide text-text-muted uppercase">
-          ZIP Code
-        </label>
-        <input
-          id="zip"
-          type="text"
-          inputMode="numeric"
-          maxLength={5}
-          value={zip}
-          onChange={(e) => setZip(e.target.value.replace(/\D/g, '').slice(0, 5))}
-          placeholder="39211"
-          className={inputClass}
-        />
+      <div className="mt-5 grid gap-4 sm:grid-cols-[1fr_7rem_9rem]">
+        <div>
+          <label htmlFor="city" className="mb-2 block text-xs tracking-wide text-text-muted uppercase">
+            City
+          </label>
+          <input
+            id="city"
+            type="text"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            placeholder="Jackson"
+            autoComplete="address-level2"
+            className={inputClass}
+          />
+        </div>
+        <div>
+          <label htmlFor="state" className="mb-2 block text-xs tracking-wide text-text-muted uppercase">
+            State
+          </label>
+          <input
+            id="state"
+            type="text"
+            maxLength={2}
+            value={state}
+            onChange={(e) => setState(e.target.value.replace(/[^A-Za-z]/g, '').toUpperCase().slice(0, 2))}
+            placeholder="MS"
+            autoComplete="address-level1"
+            className={inputClass}
+          />
+        </div>
+        <div>
+          <label htmlFor="zip" className="mb-2 block text-xs tracking-wide text-text-muted uppercase">
+            ZIP Code
+          </label>
+          <input
+            id="zip"
+            type="text"
+            inputMode="numeric"
+            maxLength={5}
+            value={zip}
+            onChange={(e) => setZip(e.target.value.replace(/\D/g, '').slice(0, 5))}
+            placeholder="39211"
+            autoComplete="postal-code"
+            className={inputClass}
+          />
+        </div>
       </div>
 
       {zip.length === 5 && (
@@ -141,8 +182,8 @@ export function StepLogistics() {
               }`}
             >
               {meetsMinimum
-                ? `Approved for delivery — orders ${FREE_DELIVERY_RADIUS_MI}–${MAX_RADIUS_MI} miles out require a ${MIN_MARQUEES_OUTSIDE_25}+ marquee minimum, which you've met.`
-                : `Delivery ${FREE_DELIVERY_RADIUS_MI}–${MAX_RADIUS_MI} miles out requires a ${MIN_MARQUEES_OUTSIDE_25}+ marquee minimum. Go back to Items and add more, or contact us directly.`}
+                ? `Approved for delivery — you're ${FREE_DELIVERY_RADIUS_MI}–${MAX_RADIUS_MI} miles out, so a ${formatCurrency(TRAVEL_FEE_BEYOND_25)} travel fee applies. It's added to your balance due at delivery, not your deposit.`
+                : `Delivery ${FREE_DELIVERY_RADIUS_MI}–${MAX_RADIUS_MI} miles out requires a ${MIN_MARQUEES_OUTSIDE_25}+ marquee minimum. Go back to Items and add one more, or contact us directly.`}
             </p>
           ) : (
             <p className="rounded-button border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">

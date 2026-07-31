@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import Stripe from 'stripe'
-import { MARQUEE_PRICE, calculateDeposit } from '../src/config/pricing.js'
+import { MARQUEE_PRICE, calculateDeposit, calculateTravelFee } from '../src/config/pricing.js'
+import { estimateDistanceMiles } from '../src/data/zipDistances.js'
 
 // Loosely typed instead of depending on @vercel/node — this file isn't part
 // of the Vite/tsc build (only src/ is), and Vercel's Node runtime supplies
@@ -163,6 +164,10 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   // Server-computed pricing — never trust client-sent totals for money.
   const marqueeCount = requestedItems.reduce((sum, i) => sum + i.qty, 0)
   const marqueeSubtotal = marqueeCount * MARQUEE_PRICE
+  // Travel fee is recomputed from the ZIP here, and is part of the order
+  // total (so it lands in revenue/SDE) but never part of the deposit.
+  const travelFee = calculateTravelFee(zip ? estimateDistanceMiles(zip) : null)
+  const orderTotal = marqueeSubtotal + travelFee
   const depositDue = calculateDeposit(marqueeCount, marqueeSubtotal)
 
   if (depositDue <= 0) {
@@ -187,11 +192,11 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       customer_email: customerEmail,
       event_type: eventType ?? null,
       indoor_outdoor: indoorOutdoor ?? null,
-      venue_address: venueAddress ? `${venueAddress}, ${zip ?? ''}`.trim() : null,
+      venue_address: venueAddress?.trim() || null,
       items: bookingItems,
-      word_built: wordBuilt || null,
+      word_built: wordBuilt ? wordBuilt.toUpperCase() : null,
       led_color: wordBuilt ? ledColor : null,
-      subtotal: marqueeSubtotal,
+      subtotal: orderTotal,
       deposit_due: depositDue,
       notes: notes ?? null,
       agreement_accepted_at: new Date().toISOString(),

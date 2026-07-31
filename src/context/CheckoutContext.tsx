@@ -24,8 +24,13 @@ interface CheckoutContextValue {
   setWeatherAck: (v: boolean) => void
   venueAddress: string
   setVenueAddress: (v: string) => void
+  city: string
+  setCity: (v: string) => void
+  state: string
+  setState: (v: string) => void
   zip: string
   setZip: (v: string) => void
+  fullVenueAddress: string
   name: string
   setName: (v: string) => void
   phone: string
@@ -51,6 +56,9 @@ export function CheckoutProvider({ children }: { children: ReactNode }) {
   const [indoorOutdoor, setIndoorOutdoor] = useState<IndoorOutdoor>(draft?.indoorOutdoor ?? '')
   const [weatherAck, setWeatherAck] = useState(draft?.weatherAck ?? false)
   const [venueAddress, setVenueAddress] = useState(draft?.venueAddress ?? '')
+  const [city, setCity] = useState(draft?.city ?? '')
+  // Sippi Lights serves a 50-mile radius of Jackson, so MS is the safe default.
+  const [state, setState] = useState(draft?.state ?? 'MS')
   const [zip, setZip] = useState(draft?.zip ?? '')
   const [name, setName] = useState(draft?.name ?? '')
   const [phone, setPhone] = useState(draft?.phone ?? '')
@@ -76,6 +84,11 @@ export function CheckoutProvider({ children }: { children: ReactNode }) {
     setAddOns((prev) => ({ ...prev, [key]: !prev[key] }))
   }
 
+  /** One clean line for display, Stripe, emails, and the delivery run. */
+  const fullVenueAddress = [venueAddress.trim(), city.trim(), [state, zip].filter(Boolean).join(' ')]
+    .filter(Boolean)
+    .join(', ')
+
   return (
     <CheckoutContext.Provider
       value={{
@@ -91,8 +104,13 @@ export function CheckoutProvider({ children }: { children: ReactNode }) {
         setWeatherAck,
         venueAddress,
         setVenueAddress,
+        city,
+        setCity,
+        state,
+        setState,
         zip,
         setZip,
+        fullVenueAddress,
         name,
         setName,
         phone,

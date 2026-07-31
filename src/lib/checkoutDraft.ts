@@ -12,6 +12,8 @@ export interface CheckoutDraft {
   indoorOutdoor: IndoorOutdoor
   weatherAck: boolean
   venueAddress: string
+  city: string
+  state: string
   zip: string
   name: string
   phone: string
