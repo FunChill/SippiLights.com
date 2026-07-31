@@ -31,6 +31,24 @@ const inputClass =
 
 type SubmitStatus = 'idle' | 'submitting' | 'success' | 'error'
 
+/** Today through three years out — anything else is a bot or a typo. */
+function isPlausibleEventDate(date: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return false
+  const parsed = new Date(`${date}T00:00:00`)
+  if (Number.isNaN(parsed.getTime())) return false
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const maxDate = new Date(today)
+  maxDate.setFullYear(maxDate.getFullYear() + 3)
+  return parsed >= today && parsed <= maxDate
+}
+
+const MAX_EVENT_DATE = (() => {
+  const d = new Date()
+  d.setFullYear(d.getFullYear() + 3)
+  return d.toISOString().slice(0, 10)
+})()
+
 export default function Contact() {
   useSEO({
     title: 'Check Availability & Get a Quote | Sippi Lights Jackson MS',
@@ -47,6 +65,21 @@ export default function Contact() {
     const form = e.currentTarget
     const data = new FormData(form)
     const selectedServices = data.getAll('services') as string[]
+
+    // Honeypot: a field no human can see or tab into. Bots fill every input
+    // they find, so anything here means automated submission. Show success so
+    // the bot doesn't retry with a different strategy — just never save it.
+    if ((data.get('company') as string)?.trim()) {
+      setSubmitStatus('success')
+      return
+    }
+
+    // Bots also love nonsense dates (a real submission arrived with the year
+    // 51201). Anything outside a plausible booking window is rejected.
+    if (!isPlausibleEventDate(eventDate)) {
+      setSubmitStatus('error')
+      return
+    }
 
     const items: Array<{
       itemId: string
@@ -167,6 +200,13 @@ export default function Contact() {
             onSubmit={handleSubmit}
             className="flex flex-col gap-5 rounded-card border border-gold/10 bg-charcoal-2 p-6 lg:p-8"
           >
+            {/* Honeypot — hidden from people, irresistible to bots. Positioned
+                off-screen rather than display:none, which bots detect. */}
+            <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
+              <label htmlFor="company">Company (leave blank)</label>
+              <input id="company" name="company" type="text" tabIndex={-1} autoComplete="off" />
+            </div>
+
             <div className="grid gap-5 sm:grid-cols-2">
               <div>
                 <label htmlFor="name" className="mb-2 block text-xs tracking-wide text-text-muted uppercase">
@@ -199,6 +239,8 @@ export default function Contact() {
                   name="eventDate"
                   type="date"
                   required
+                  min={new Date().toISOString().slice(0, 10)}
+                  max={MAX_EVENT_DATE}
                   value={eventDate}
                   onChange={(e) => setEventDate(e.target.value)}
                   className={inputClass}

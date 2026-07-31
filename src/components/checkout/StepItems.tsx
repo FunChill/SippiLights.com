@@ -22,8 +22,7 @@ export function StepItems() {
     <div>
       <h2 className="font-headline text-2xl font-light">Build Your Order</h2>
       <p className="mt-2 text-sm text-text-muted">
-        Type your word or number below — this is what shows up as your
-        marquee.
+        Type your word or number below — this is what we'll build for you.
       </p>
 
       <div className="mt-8 rounded-card border border-gold/10 bg-charcoal-2 p-6">

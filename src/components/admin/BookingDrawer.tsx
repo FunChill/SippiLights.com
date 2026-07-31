@@ -23,6 +23,8 @@ export function BookingDrawer({ booking, onClose, onChanged }: BookingDrawerProp
   const [notes, setNotes] = useState(booking.notes ?? '')
   const [status, setStatus] = useState<BookingStatus>(booking.status)
   const [balanceMethod, setBalanceMethod] = useState<'cash' | 'card' | 'other'>('cash')
+  const [refundAmount, setRefundAmount] = useState('')
+  const [refundNote, setRefundNote] = useState<string | null>(null)
   const [agreementUrl, setAgreementUrl] = useState<string | null>(null)
   const [paymentLink, setPaymentLink] = useState<string | null>(null)
   const [busy, setBusy] = useState<string | null>(null)
@@ -46,6 +48,37 @@ export function BookingDrawer({ booking, onClose, onChanged }: BookingDrawerProp
       setBusy(null)
     }
   }
+
+  const paid = booking.amount_paid ?? 0
+  const alreadyRefunded = booking.refund_amount ?? 0
+  const refundable = Math.max(0, paid - alreadyRefunded)
+
+  const issueRefund = () =>
+    run('refund', async () => {
+      const amount = refundAmount.trim() === '' ? null : Number(refundAmount)
+      if (amount !== null && (!Number.isFinite(amount) || amount <= 0)) {
+        throw new Error('Enter a refund amount greater than zero.')
+      }
+      const label = amount === null ? `the full ${formatCurrency(refundable)}` : formatCurrency(amount)
+      if (!window.confirm(`Refund ${label} to ${booking.customer_name}? This cannot be undone.`)) {
+        return
+      }
+      const { data: sessionData } = await supabase.auth.getSession()
+      const res = await fetch('/api/admin-refund', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${sessionData.session?.access_token}`,
+        },
+        body: JSON.stringify({ bookingId: booking.id, amount }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Refund failed.')
+      setRefundAmount('')
+      setRefundNote(
+        `Refunded ${formatCurrency(data.refunded)}${data.remaining > 0 ? ` · ${formatCurrency(data.remaining)} still refundable` : ' · fully refunded'}`,
+      )
+    })
 
   const createPaymentLink = () =>
     run('link', async () => {
@@ -109,13 +142,23 @@ export function BookingDrawer({ booking, onClose, onChanged }: BookingDrawerProp
             value={`${booking.deposit_due != null ? formatCurrency(booking.deposit_due) : '—'} · ${booking.deposit_paid ? 'PAID' : 'unpaid'}`}
           />
           <Row
+            label="Paid online"
+            value={
+              booking.amount_paid != null
+                ? `${formatCurrency(booking.amount_paid)}${booking.paid_in_full ? ' · PAID IN FULL' : ''}`
+                : '—'
+            }
+          />
+          <Row
             label="Balance"
             value={
-              booking.balance_collected_at
-                ? `COLLECTED ${booking.balance_collected_at.slice(0, 10)} (${booking.balance_payment_method ?? '—'})`
-                : booking.subtotal != null && booking.deposit_due != null
-                  ? `${formatCurrency(booking.subtotal - booking.deposit_due)} due at delivery`
-                  : '—'
+              booking.paid_in_full
+                ? 'Nothing due at delivery ✓'
+                : booking.balance_collected_at
+                  ? `COLLECTED ${booking.balance_collected_at.slice(0, 10)} (${booking.balance_payment_method ?? '—'})`
+                  : booking.subtotal != null
+                    ? `${formatCurrency(booking.subtotal - (booking.amount_paid ?? booking.deposit_due ?? 0))} due at delivery`
+                    : '—'
             }
           />
         </div>
@@ -147,7 +190,10 @@ export function BookingDrawer({ booking, onClose, onChanged }: BookingDrawerProp
               disabled={busy !== null}
             />
           )}
-          {booking.deposit_paid && booking.status === 'confirmed' && !booking.balance_collected_at && (
+          {booking.deposit_paid &&
+            booking.status === 'confirmed' &&
+            !booking.balance_collected_at &&
+            !booking.paid_in_full && (
             <div className="flex items-center gap-2">
               <select
                 value={balanceMethod}
@@ -174,6 +220,15 @@ export function BookingDrawer({ booking, onClose, onChanged }: BookingDrawerProp
               />
             </div>
           )}
+          {/* Prepaid bookings skip balance collection entirely — but still
+              need marking complete so they land in realized revenue. */}
+          {booking.paid_in_full && booking.status === 'confirmed' && (
+            <ActionButton
+              label={busy === 'complete' ? 'Saving…' : 'Mark completed (prepaid)'}
+              onClick={() => run('complete', () => updateBooking(booking.id, { status: 'completed' }))}
+              disabled={busy !== null}
+            />
+          )}
           {agreementUrl && (
             <a
               href={agreementUrl}
@@ -185,6 +240,49 @@ export function BookingDrawer({ booking, onClose, onChanged }: BookingDrawerProp
             </a>
           )}
         </div>
+
+        {/* Refunds without leaving the dashboard. Blank amount = refund the
+            whole remaining balance; partial refunds are supported for
+            goodwill adjustments on bookings that still go ahead. */}
+        {booking.stripe_payment_intent_id && refundable > 0 && (
+          <div className="mt-4 rounded-button border border-red-500/20 bg-red-500/5 p-3">
+            <p className="text-[10px] tracking-wide text-text-muted uppercase">
+              Refund · {formatCurrency(refundable)} refundable
+              {alreadyRefunded > 0 ? ` (${formatCurrency(alreadyRefunded)} already refunded)` : ''}
+            </p>
+            <div className="mt-2 flex items-center gap-2">
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={refundAmount}
+                onChange={(e) => setRefundAmount(e.target.value)}
+                placeholder={`Full (${formatCurrency(refundable)})`}
+                className="w-32 rounded border border-red-500/30 bg-charcoal px-2 py-1.5 text-xs text-warm-white"
+              />
+              <button
+                type="button"
+                onClick={issueRefund}
+                disabled={busy !== null}
+                className="rounded-button border border-red-400/50 px-3 py-1.5 text-xs text-red-300 hover:bg-red-500/20 disabled:opacity-50"
+              >
+                {busy === 'refund' ? 'Refunding…' : 'Issue refund'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {refundNote && (
+          <p className="mt-2 rounded-button border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-300">
+            {refundNote}
+          </p>
+        )}
+
+        {booking.refunded_at && refundable <= 0 && (
+          <p className="mt-2 text-xs text-text-muted">
+            Fully refunded {booking.refunded_at.slice(0, 10)}.
+          </p>
+        )}
 
         {paymentLink && (
           <div className="mt-4 rounded-button border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-300">

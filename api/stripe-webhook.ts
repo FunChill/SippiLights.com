@@ -118,9 +118,21 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     const bookingId = session.metadata?.booking_id
 
     if (bookingId) {
+      // Capture the payment intent so refunds can be issued from the admin
+      // dashboard without logging into Stripe.
+      const paymentIntentId =
+        typeof session.payment_intent === 'string'
+          ? session.payment_intent
+          : (session.payment_intent?.id ?? null)
+
       const { data: updated, error } = await supabaseAdmin
         .from('bookings')
-        .update({ deposit_paid: true, status: 'confirmed' })
+        .update({
+          deposit_paid: true,
+          status: 'confirmed',
+          stripe_payment_intent_id: paymentIntentId,
+          ...(session.amount_total != null ? { amount_paid: session.amount_total / 100 } : {}),
+        })
         .eq('id', bookingId)
         .eq('status', 'pending_deposit') // don't resurrect an already-cancelled/expired booking
         .select('id')
