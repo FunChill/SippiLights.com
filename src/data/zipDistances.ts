@@ -43,11 +43,33 @@ export const ZIP_DISTANCES: Record<string, number> = {
   '39042': 15,
   '39047': 16,
 
-  // Outer metro / edge of service area
+  // Outer metro
   '39066': 18, // Terry
   '39154': 20, // Raymond
-  '39288': 25, // Pelahatchie
-  '39073': 25, // Crystal Springs
+  '39073': 18, // Florence (was mislabeled Crystal Springs)
+  '39288': 12, // Pearl (PO box ZIP; was mislabeled Pelahatchie)
+  '39145': 25, // Pelahatchie
+
+  // 26-50 miles: delivery allowed with a 2-marquee minimum and a flat
+  // travel fee. Verified against Walt's actual service area.
+  '39046': 28, // Canton
+  '39071': 27, // Flora
+  '39059': 30, // Crystal Springs
+  '39175': 30, // Utica
+  '39151': 30, // Puckett
+  '39044': 32, // Braxton
+  '39040': 35, // Bentonia
+  '39114': 35, // Mendenhall
+  '39117': 38, // Morton
+  '39083': 40, // Hazlehurst
+  '39094': 40, // Lena
+  '39146': 40, // Pickens
+  '39045': 42, // Camden
+  '39051': 45, // Carthage
+  '39074': 45, // Forest
+  '39111': 45, // Magee
+  '39180': 45, // Vicksburg
+  '39194': 48, // Yazoo City
 }
 
 /**
