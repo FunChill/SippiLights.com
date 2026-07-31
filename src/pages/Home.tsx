@@ -126,11 +126,6 @@ export default function Home() {
           <h2 className="mt-4 font-headline text-3xl font-light lg:text-4xl">
             Build Your Word
           </h2>
-          <p className="mt-4 max-w-xl text-text-muted">
-            Type a name or number below and watch it light up as a marquee —
-            with your price, live.
-          </p>
-
           <div className="mt-10 rounded-card border border-gold/10 bg-charcoal-2 p-6 lg:p-10">
             <WordBuilder compact />
           </div>

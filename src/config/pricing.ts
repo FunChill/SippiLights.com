@@ -40,6 +40,24 @@ export function calculateDeposit(marqueeCount: number, marqueeSubtotal: number):
   return Math.round(marqueeSubtotal * MULTI_MARQUEE_DEPOSIT_PERCENT)
 }
 
+/**
+ * Customers may pay more than the required minimum at booking — up to the
+ * full order total. Returns the amount actually charged, clamped so it can
+ * never fall below the minimum or exceed what's owed. Used on both sides:
+ * the browser for display, the server as the authority.
+ */
+export function clampPaymentAmount(
+  requested: number,
+  minimumDue: number,
+  orderTotal: number,
+): number {
+  if (!Number.isFinite(requested)) return minimumDue
+  const rounded = Math.round(requested * 100) / 100
+  if (rounded < minimumDue) return minimumDue
+  if (rounded > orderTotal) return orderTotal
+  return rounded
+}
+
 export type DeliveryZone = 'free' | 'requires-minimum' | 'out-of-area'
 
 /** Travel fee for a distance. Free inside the delivery radius. */

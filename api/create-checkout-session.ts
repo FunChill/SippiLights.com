@@ -1,6 +1,11 @@
 import { createClient } from '@supabase/supabase-js'
 import Stripe from 'stripe'
-import { MARQUEE_PRICE, calculateDeposit, calculateTravelFee } from '../src/config/pricing.js'
+import {
+  MARQUEE_PRICE,
+  calculateDeposit,
+  calculateTravelFee,
+  clampPaymentAmount,
+} from '../src/config/pricing.js'
 import { estimateDistanceMiles } from '../src/data/zipDistances.js'
 
 // Loosely typed instead of depending on @vercel/node — this file isn't part
@@ -35,6 +40,7 @@ interface RequestedItemInput {
 interface CheckoutBody {
   eventDate?: string
   items?: Array<{ character: string; finish: string; qty: number }>
+  amountToPay?: number
   wordBuilt?: string
   ledColor?: string
   customerName?: string
@@ -57,6 +63,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   const {
     eventDate,
     items,
+    amountToPay,
     wordBuilt,
     ledColor,
     customerName,
@@ -174,6 +181,11 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     return res.status(400).json({ error: 'Nothing to charge a deposit for.' })
   }
 
+  // The customer may choose to pay more than the minimum. Re-clamped here so
+  // a tampered client can't charge less than the deposit or more than owed.
+  const amountToCharge = clampPaymentAmount(Number(amountToPay), depositDue, orderTotal)
+  const paidInFull = amountToCharge >= orderTotal
+
   const bookingItems = requestedItems.map((i) => ({
     itemId: `${i.finish}-${i.character}`,
     character: i.character,
@@ -198,6 +210,8 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       led_color: wordBuilt ? ledColor : null,
       subtotal: orderTotal,
       deposit_due: depositDue,
+      amount_paid: amountToCharge,
+      paid_in_full: paidInFull,
       notes: notes ?? null,
       agreement_accepted_at: new Date().toISOString(),
       agreement_name: agreementName,
@@ -224,10 +238,10 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
             currency: 'usd',
             product_data: {
               name: wordBuilt
-                ? `Sippi Lights deposit — "${wordBuilt}"`
-                : 'Sippi Lights deposit',
+                ? `Sippi Lights ${paidInFull ? 'payment in full' : 'deposit'} — "${wordBuilt.toUpperCase()}"`
+                : `Sippi Lights ${paidInFull ? 'payment in full' : 'deposit'}`,
             },
-            unit_amount: Math.round(depositDue * 100),
+            unit_amount: Math.round(amountToCharge * 100),
           },
           quantity: 1,
         },

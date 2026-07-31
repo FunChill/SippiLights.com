@@ -36,6 +36,11 @@ export interface Booking {
   agreement_pdf_path: string | null
   balance_collected_at: string | null
   balance_payment_method: 'cash' | 'card' | 'other' | null
+  amount_paid: number | null
+  paid_in_full: boolean
+  stripe_payment_intent_id: string | null
+  refunded_at: string | null
+  refund_amount: number | null
 }
 
 export const STATUS_COLORS: Record<BookingStatus, string> = {
