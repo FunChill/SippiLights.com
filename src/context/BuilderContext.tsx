@@ -31,7 +31,11 @@ export function BuilderProvider({ children }: { children: ReactNode }) {
   const [numberFinish, setNumberFinish] = useState<Finish>(draft?.numberFinish ?? 'white')
   const [eventDate, setEventDate] = useState(draft?.eventDate ?? '')
 
-  const setWord = (value: string) => setWordState(value.slice(0, MAX_LENGTH))
+  // Uppercased at the single point of entry: the physical marquees are
+  // capitals, and everything downstream (Stripe line item, emails, agreement
+  // PDF, admin) reads this value — so it must never carry the customer's
+  // casual lowercase typing.
+  const setWord = (value: string) => setWordState(value.toUpperCase().slice(0, MAX_LENGTH))
 
   const setColorId = (id: string) => {
     const next = MARQUEE_COLORS.find((c) => c.id === id)

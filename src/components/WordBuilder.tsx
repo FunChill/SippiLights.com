@@ -42,6 +42,7 @@ export function WordBuilder({
   }
 
   const chars = word.split('')
+  const hasNumbers = /[0-9]/.test(word)
   const pricedChars = chars.filter((c) => c !== ' ')
   const prices = pricedChars.map((c) => getCharPrice(c) ?? 0)
   const total = prices.reduce((sum, p) => sum + p, 0)
@@ -136,8 +137,15 @@ export function WordBuilder({
         </div>
       </div>
 
+      {/* Finish applies to numbers only. With no digits typed the control is
+          disabled — leaving it live implied a black LETTER was selectable and
+          available, which it never is. */}
       <div className="mt-6">
-        <p className="mb-2 text-xs tracking-[0.15em] text-text-muted uppercase">
+        <p
+          className={`mb-2 text-xs tracking-[0.15em] uppercase ${
+            hasNumbers ? 'text-text-muted' : 'text-text-muted/40'
+          }`}
+        >
           Number Finish
         </p>
         <div className="flex items-center gap-3">
@@ -145,18 +153,23 @@ export function WordBuilder({
             <button
               key={f}
               type="button"
+              disabled={!hasNumbers}
               onClick={() => setNumberFinish(f)}
-              aria-pressed={numberFinish === f}
+              aria-pressed={hasNumbers && numberFinish === f}
               className={`rounded-button border px-4 py-2 text-sm capitalize transition-colors duration-150 ${
-                numberFinish === f
-                  ? 'border-gold bg-gold text-charcoal'
-                  : 'border-gold/20 text-warm-white/80 hover:border-gold/50'
+                !hasNumbers
+                  ? 'cursor-not-allowed border-gold/10 text-text-muted/40 line-through'
+                  : numberFinish === f
+                    ? 'border-gold bg-gold text-charcoal'
+                    : 'border-gold/20 text-warm-white/80 hover:border-gold/50'
               }`}
             >
               {f}
             </button>
           ))}
-          <p className="text-xs text-text-muted">Letters are white only.</p>
+          <p className="text-xs text-text-muted">
+            {hasNumbers ? 'Letters are white only.' : 'Add a number to choose a finish — letters are white only.'}
+          </p>
         </div>
       </div>
 

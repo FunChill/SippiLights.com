@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useSEO } from '../lib/seo'
 import { CheckoutProvider, useCheckout } from '../context/CheckoutContext'
@@ -54,6 +55,21 @@ function StepProgress() {
 
 function CheckoutSteps() {
   const { step } = useCheckout()
+  const isFirstRender = useRef(true)
+
+  // Each step swaps in place, so without this the customer lands wherever
+  // they were scrolled — usually staring at the bottom of the next step.
+  // Skipped on first render so arriving at /book doesn't yank the page.
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
+    document.getElementById('checkout-top')?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    })
+  }, [step])
 
   const steps: Record<number, React.ReactNode> = {
     1: <StepDate />,
@@ -96,7 +112,7 @@ export default function Book() {
             Book Your Marquee
           </h1>
 
-          <div className="mt-12">
+          <div id="checkout-top" className="mt-12 scroll-mt-24">
             <StepProgress />
             <CheckoutSteps />
           </div>

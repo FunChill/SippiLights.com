@@ -9,7 +9,16 @@ export const MULTI_MARQUEE_DEPOSIT_PERCENT = 0.25
 
 export const FREE_DELIVERY_RADIUS_MI = 25
 export const MAX_RADIUS_MI = 50
-export const MIN_MARQUEES_OUTSIDE_25 = 4
+
+// Lowered from 4 to 2 (Walt, 2026) — the travel fee below now carries the
+// cost of the longer run, so the order minimum no longer has to.
+export const MIN_MARQUEES_OUTSIDE_25 = 2
+
+// Flat fee for the 26–50 mile zone. Flat rather than per-mile so the customer
+// understands it instantly. Collected with the balance at delivery, NOT in the
+// deposit — the deposit rule stays purely marquee-based.
+// PENDING WALT'S FINAL NUMBER — change this one constant.
+export const TRAVEL_FEE_BEYOND_25 = 35
 
 export const HOME_BASE_ZIP = '39211'
 
@@ -32,6 +41,14 @@ export function calculateDeposit(marqueeCount: number, marqueeSubtotal: number):
 }
 
 export type DeliveryZone = 'free' | 'requires-minimum' | 'out-of-area'
+
+/** Travel fee for a distance. Free inside the delivery radius. */
+export function calculateTravelFee(distanceMiles: number | null): number {
+  if (distanceMiles === null) return 0
+  if (distanceMiles <= FREE_DELIVERY_RADIUS_MI) return 0
+  if (distanceMiles <= MAX_RADIUS_MI) return TRAVEL_FEE_BEYOND_25
+  return 0 // out of area — not bookable online at all
+}
 
 /** Which delivery zone a distance falls into, and whether the current marquee count satisfies it. */
 export function getDeliveryZone(distanceMiles: number): DeliveryZone {

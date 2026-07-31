@@ -1,5 +1,5 @@
 import { supabaseAdmin } from './_lib/supabaseAdmin.js'
-import { sendReminderEmail, sendThankYouEmail } from './_lib/emails.js'
+import { sendInquiryNudgeEmail, sendReminderEmail, sendThankYouEmail } from './_lib/emails.js'
 
 interface ApiRequest {
   method?: string
@@ -9,6 +9,9 @@ interface ApiResponse {
   status(code: number): ApiResponse
   json(data: unknown): void
 }
+
+/** Days after a saved-but-unconfirmed inquiry before the single nudge fires. */
+const INQUIRY_NUDGE_DAYS = 14
 
 function isoDateWithOffset(days: number): string {
   const d = new Date()
@@ -30,6 +33,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
 
   let remindersSent = 0
   let thankYousSent = 0
+  let nudgesSent = 0
   const errors: string[] = []
 
   // Reminders: event within 3 days from today (but not past), not yet reminded.
@@ -98,5 +102,42 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     }
   }
 
-  return res.status(200).json({ remindersSent, thankYousSent, errors })
+  // Inquiry nudges: saved-but-unconfirmed setups, 14 days old, event still in
+  // the future, never nudged before. One nudge only — the sent-at stamp makes
+  // that true even if the cron reruns.
+  const fourteenDaysAgo = new Date()
+  fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - INQUIRY_NUDGE_DAYS)
+
+  const { data: staleInquiries, error: inquiryError } = await supabaseAdmin
+    .from('bookings')
+    .select('*')
+    .eq('status', 'inquiry')
+    .is('inquiry_nudge_sent_at', null)
+    .lte('created_at', fourteenDaysAgo.toISOString())
+    .gte('event_date', isoDateWithOffset(0))
+
+  if (inquiryError) errors.push(`inquiry nudge query: ${inquiryError.message}`)
+
+  for (const booking of staleInquiries ?? []) {
+    try {
+      await sendInquiryNudgeEmail({
+        customerName: booking.customer_name,
+        customerEmail: booking.customer_email,
+        eventDate: booking.event_date,
+        wordBuilt: booking.word_built,
+        subtotal: booking.subtotal,
+        depositDue: booking.deposit_due,
+        venueAddress: booking.venue_address,
+      })
+      await supabaseAdmin
+        .from('bookings')
+        .update({ inquiry_nudge_sent_at: new Date().toISOString() })
+        .eq('id', booking.id)
+      nudgesSent++
+    } catch (err) {
+      errors.push(`nudge ${booking.id}: ${err instanceof Error ? err.message : 'failed'}`)
+    }
+  }
+
+  return res.status(200).json({ remindersSent, thankYousSent, nudgesSent, errors })
 }
