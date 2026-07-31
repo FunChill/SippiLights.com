@@ -60,19 +60,10 @@ export function wordToRequestedItems(word: string, numberFinish: Finish): Reques
   return [...byKey.values()]
 }
 
-/** Dates within [startDate, endDate] (inclusive, 'YYYY-MM-DD') that have at least one real booking — for shading a calendar. Not per-character; a shaded date may still have specific letters/numbers available. */
-export async function getBookedDatesInRange(
-  startDate: string,
-  endDate: string,
-): Promise<Set<string>> {
-  const { data, error } = await supabase.rpc('get_booked_dates', {
-    start_date: startDate,
-    end_date: endDate,
-  })
-
-  if (error) throw error
-  return new Set((data ?? []).map((row: { event_date: string }) => row.event_date))
-}
+// NOTE: there is deliberately no "which dates have bookings" lookup here.
+// Exposing that to customers reveals how busy the schedule is, which is
+// nobody's business and helps no one book. Availability is answered per
+// item at the point the customer names their word and date.
 
 /** Manually-blocked dates (holidays, maintenance) within [startDate, endDate] — for shading a calendar. */
 export async function getBlockedDatesInRange(

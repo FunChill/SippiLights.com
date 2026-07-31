@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useCheckout } from '../../context/CheckoutContext'
-import { getBlockedDatesInRange, getBookedDatesInRange } from '../../lib/availability'
+import { getBlockedDatesInRange } from '../../lib/availability'
 import { StepNav } from './StepNav'
 
 const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
@@ -29,7 +29,6 @@ export function StepDate() {
     return new Date(initial.getFullYear(), initial.getMonth(), 1)
   })
   const [blocked, setBlocked] = useState<Set<string>>(new Set())
-  const [booked, setBooked] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -41,19 +40,17 @@ export function StepDate() {
     let cancelled = false
     setLoading(true)
 
-    Promise.all([
-      getBlockedDatesInRange(rangeStart, rangeEnd),
-      getBookedDatesInRange(rangeStart, rangeEnd),
-    ])
-      .then(([blockedSet, bookedSet]) => {
+    // Only owner-blocked dates are fetched. Existing bookings are deliberately
+    // NOT surfaced — the calendar must never reveal how busy (or not) the
+    // schedule is. Per-item availability is checked at the next step.
+    getBlockedDatesInRange(rangeStart, rangeEnd)
+      .then((blockedSet) => {
         if (cancelled) return
         setBlocked(blockedSet)
-        setBooked(bookedSet)
       })
       .catch(() => {
         if (cancelled) return
         setBlocked(new Set())
-        setBooked(new Set())
       })
       .finally(() => {
         if (!cancelled) setLoading(false)
@@ -115,7 +112,6 @@ export function StepDate() {
 
           const isPast = cell.date < today
           const isBlocked = blocked.has(cell.iso)
-          const isBooked = booked.has(cell.iso)
           const isSelected = eventDate === cell.iso
           const disabled = isPast || isBlocked
 
@@ -134,9 +130,6 @@ export function StepDate() {
               }`}
             >
               {cell.date.getDate()}
-              {isBooked && !isSelected && !disabled && (
-                <span className="absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-gold" />
-              )}
             </button>
           )
         })}
@@ -146,9 +139,8 @@ export function StepDate() {
         <p className="mt-4 text-xs text-text-muted">Loading availability…</p>
       )}
       <p className="mt-4 text-xs text-text-muted">
-        Struck-through dates are unavailable. A gold dot means the date has
-        some existing bookings — pick it and we'll check your specific
-        letters and numbers next.
+        Struck-through dates are unavailable. Pick your date and we'll check
+        your specific letters and numbers next.
       </p>
 
       <StepNav hideBack nextDisabled={!eventDate} onNext={() => setStep(2)} />
