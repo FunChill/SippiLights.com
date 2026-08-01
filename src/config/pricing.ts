@@ -17,7 +17,7 @@ export const MIN_MARQUEES_OUTSIDE_25 = 2
 // Flat fee for the 26–50 mile zone. Flat rather than per-mile so the customer
 // understands it instantly. Collected with the balance at delivery, NOT in the
 // deposit — the deposit rule stays purely marquee-based.
-// PENDING WALT'S FINAL NUMBER — change this one constant.
+// $35 confirmed by Walt (2026). Change this one constant to adjust it.
 export const TRAVEL_FEE_BEYOND_25 = 35
 
 export const HOME_BASE_ZIP = '39211'
