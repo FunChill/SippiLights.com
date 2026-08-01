@@ -44,9 +44,6 @@ which are unusually detailed — read those if the notes are ever in doubt.
 
 ## Open items across phases
 
-- **`TRAVEL_FEE_BEYOND_25`** in `src/config/pricing.ts` is marked *PENDING
-  WALT'S FINAL NUMBER*. One constant. Until it is set, no customer-facing
-  surface should state a travel-fee dollar amount. (Phase 8)
 - **A2P 10DLC registration** gates all of Phase 9 and should be started before
   any SMS code is written. EIN details must match IRS records exactly.
 - **Phase 9 open decisions** — dedicated texting number vs. porting

@@ -58,9 +58,9 @@ Three rules that must not drift:
 3. Lands in the **balance due at delivery, never in the deposit**, so the
    $20 / 25% deposit rule stays purely marquee-based.
 
-> ⚠️ `TRAVEL_FEE_BEYOND_25` is marked **PENDING WALT'S FINAL NUMBER** in
-> `src/config/pricing.ts`. It is a single constant — changing it is the whole
-> edit. This is the only open item left from Phase 8.
+The fee is **$35 flat**, confirmed by Walt. The constant carried a stale
+"PENDING WALT'S FINAL NUMBER" comment for a while after the number was
+actually decided — the value was always correct, the comment was not.
 
 `42d6f89` later loaded the 26–50 mile ZIP ring into `src/data/zipDistances.ts`,
 without which the fee could never actually fire.
@@ -141,10 +141,7 @@ real fixtures, and the gallery does that job honestly.
 
 ## What Phase 8 leaves open
 
-1. **`TRAVEL_FEE_BEYOND_25` still needs Walt's final number.** One constant in
-   `src/config/pricing.ts`. Until it is set, no customer-facing surface should
-   state a travel-fee dollar amount.
-2. Phase 8 was built without a spec. If that is to be the norm going forward,
+1. Phase 8 was built without a spec. If that is to be the norm going forward,
    the phase-document convention should be retired deliberately rather than
    left to lapse — otherwise the record gets patchier over time, as it did
    here.

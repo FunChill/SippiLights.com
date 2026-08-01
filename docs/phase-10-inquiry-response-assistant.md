@@ -73,9 +73,9 @@ hard constraints, not as suggestions in a prompt.
 6. **Never imply a date is held.** Nothing is reserved until a deposit is paid.
    A saved inquiry explicitly holds no inventory — see the comment in
    `api/save-inquiry.ts`.
-7. **`TRAVEL_FEE_BEYOND_25` is marked PENDING WALT'S FINAL NUMBER.** If it is
-   still pending when this is built, the drafter must not state a travel-fee
-   dollar amount at all.
+7. **Quote the travel fee from the constant, never from memory.** It is $35
+   flat as of 2026, but the drafter must read `TRAVEL_FEE_BEYOND_25` at
+   request time so a future change propagates automatically.
 
 Rules 1–7 belong in a test, not just a prompt. A snapshot test per rule, run
 against a fixed fact sheet, is the cheapest insurance here.
