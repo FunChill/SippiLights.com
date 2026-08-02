@@ -154,6 +154,33 @@ export async function sendInquiryAutoReply(customerName: string, customerEmail: 
   })
 }
 
+/**
+ * Sends a reply Walt has reviewed and approved in the dashboard. Goes through
+ * the same Resend client and FROM address as every other email — there is
+ * deliberately no second send path. Plain text is wrapped in the house layout
+ * so an approved draft looks like the rest of Sippi Lights' mail.
+ */
+export async function sendDraftedReply(
+  customerEmail: string,
+  subject: string,
+  body: string,
+): Promise<void> {
+  const paragraphs = body
+    .trim()
+    .split(/\n{2,}/)
+    .map((p) => `<p>${p.replace(/\n/g, '<br />')}</p>`)
+    .join('')
+
+  await resend.emails.send({
+    from: FROM,
+    to: customerEmail,
+    replyTo: OWNER,
+    subject,
+    html: layout(paragraphs),
+    text: body.trim(),
+  })
+}
+
 export async function sendOwnerInquiryNotification(summary: string): Promise<void> {
   await resend.emails.send({
     from: FROM,

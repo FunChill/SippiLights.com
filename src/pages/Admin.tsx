@@ -13,6 +13,13 @@ import {
 import { BookingDrawer } from '../components/admin/BookingDrawer'
 import { QuickActions } from '../components/admin/QuickActions'
 import { ReviewsWidget } from '../components/admin/ReviewsWidget'
+import { DraftReplyPanel } from '../components/admin/DraftReplyPanel'
+import {
+  TRIAGE_COLORS,
+  TRIAGE_LABELS,
+  fetchTriageByBooking,
+  type Triage,
+} from '../lib/inquiryAssistant'
 import Financials from './admin/Financials'
 import Assets from './admin/Assets'
 import Playbook from './admin/Playbook'
@@ -118,6 +125,75 @@ function AdminShell() {
   )
 }
 
+/**
+ * For messages that never touch the site — chiefly Facebook Marketplace, which
+ * lands in Walt's personal Messenger inbox. Paste in, get triage and a draft,
+ * copy back out. Deliberately no send: automating personal-profile DMs would
+ * risk the account his Marketplace access depends on.
+ */
+function MarketplaceDrafter() {
+  const [open, setOpen] = useState(false)
+  const [eventDate, setEventDate] = useState('')
+  const [zip, setZip] = useState('')
+
+  return (
+    <div className="rounded-card border border-gold/10 bg-charcoal-2 p-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xs tracking-[0.15em] text-text-muted uppercase">
+          Marketplace / text reply
+        </h2>
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          className="text-xs text-gold hover:underline"
+        >
+          {open ? 'Close' : 'Open'}
+        </button>
+      </div>
+
+      {open ? (
+        <div className="mt-3 flex flex-col gap-3">
+          {/* Optional, but the facts get much sharper with them. */}
+          <div className="flex flex-wrap gap-2">
+            <label className="flex flex-col gap-1 text-[10px] tracking-wide text-text-muted uppercase">
+              Their date (if known)
+              <input
+                type="date"
+                value={eventDate}
+                onChange={(e) => setEventDate(e.target.value)}
+                className="rounded-button border border-gold/20 bg-charcoal px-2 py-1.5 text-xs text-warm-white"
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-[10px] tracking-wide text-text-muted uppercase">
+              Their ZIP
+              <input
+                type="text"
+                inputMode="numeric"
+                maxLength={5}
+                value={zip}
+                onChange={(e) => setZip(e.target.value.replace(/\D/g, '').slice(0, 5))}
+                placeholder="39211"
+                className="w-24 rounded-button border border-gold/20 bg-charcoal px-2 py-1.5 text-xs text-warm-white"
+              />
+            </label>
+          </div>
+
+          <DraftReplyPanel
+            eventDate={eventDate || undefined}
+            zip={zip || undefined}
+            channel="messenger"
+          />
+        </div>
+      ) : (
+        <p className="mt-2 text-xs text-text-muted">
+          Paste a Marketplace message in and get a draft grounded in real availability
+          and pricing — then copy it back yourself.
+        </p>
+      )}
+    </div>
+  )
+}
+
 function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -176,6 +252,7 @@ function Dashboard() {
   const [inquiries, setInquiries] = useState<Booking[]>([])
   const [upcoming, setUpcoming] = useState<Booking[]>([])
   const [selected, setSelected] = useState<Booking | null>(null)
+  const [triageMap, setTriageMap] = useState<Map<string, Triage>>(new Map())
   const [refreshKey, setRefreshKey] = useState(0)
 
   const refresh = useCallback(() => setRefreshKey((k) => k + 1), [])
@@ -195,6 +272,7 @@ function Dashboard() {
       .catch(() => setUpcoming([]))
 
     fetchInquiries().then(setInquiries).catch(() => setInquiries([]))
+    fetchTriageByBooking().then(setTriageMap).catch(() => setTriageMap(new Map()))
   }, [viewDate, refreshKey])
 
   const year = viewDate.getFullYear()
@@ -325,20 +403,36 @@ function Dashboard() {
                 <p className="mt-3 text-sm text-text-muted">Inbox zero. Nice.</p>
               ) : (
                 <div className="mt-3 flex flex-col gap-2">
-                  {inquiries.map((b) => (
-                    <button
-                      key={b.id}
-                      type="button"
-                      onClick={() => setSelected(b)}
-                      className="rounded-button border border-gold/10 px-3 py-2 text-left text-sm hover:border-gold/40"
-                    >
-                      <span className="text-warm-white">{b.customer_name}</span>{' '}
-                      <span className="text-text-muted">
-                        · {b.event_date} · {b.event_type ?? 'event'}
-                        {b.word_built ? ` · "${b.word_built}"` : ''}
-                      </span>
-                    </button>
-                  ))}
+                  {inquiries.map((b) => {
+                    const triage = triageMap.get(b.id)
+                    return (
+                      <button
+                        key={b.id}
+                        type="button"
+                        onClick={() => setSelected(b)}
+                        className={`rounded-button border px-3 py-2 text-left text-sm hover:border-gold/40 ${
+                          triage === 'spam' || triage === 'scam'
+                            ? 'border-gold/5 opacity-60'
+                            : 'border-gold/10'
+                        }`}
+                      >
+                        <span className="flex flex-wrap items-center gap-2">
+                          <span className="text-warm-white">{b.customer_name}</span>
+                          {triage && (
+                            <span
+                              className={`rounded border px-1.5 py-0.5 text-[9px] tracking-wide uppercase ${TRIAGE_COLORS[triage]}`}
+                            >
+                              {TRIAGE_LABELS[triage]}
+                            </span>
+                          )}
+                        </span>
+                        <span className="text-text-muted">
+                          {b.event_date} · {b.event_type ?? 'event'}
+                          {b.word_built ? ` · "${b.word_built}"` : ''}
+                        </span>
+                      </button>
+                    )
+                  })}
                 </div>
               )}
             </div>
@@ -346,6 +440,7 @@ function Dashboard() {
 
           <div className="flex flex-col gap-6">
             <QuickActions onChanged={refresh} />
+            <MarketplaceDrafter />
             <ReviewsWidget />
           </div>
         </div>

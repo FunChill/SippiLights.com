@@ -4,6 +4,7 @@ import type { Booking, BookingStatus } from '../../lib/bookings'
 import { STATUS_LABELS, getAgreementUrl, updateBooking } from '../../lib/bookings'
 import { supabase } from '../../lib/supabaseClient'
 import { formatCurrency } from '../../config/pricing'
+import { DraftReplyPanel } from './DraftReplyPanel'
 
 const ALL_STATUSES: BookingStatus[] = [
   'inquiry',
@@ -25,6 +26,7 @@ export function BookingDrawer({ booking, onClose, onChanged }: BookingDrawerProp
   const [balanceMethod, setBalanceMethod] = useState<'cash' | 'card' | 'other'>('cash')
   const [refundAmount, setRefundAmount] = useState('')
   const [refundNote, setRefundNote] = useState<string | null>(null)
+  const [showDrafter, setShowDrafter] = useState(false)
   const [agreementUrl, setAgreementUrl] = useState<string | null>(null)
   const [paymentLink, setPaymentLink] = useState<string | null>(null)
   const [busy, setBusy] = useState<string | null>(null)
@@ -295,6 +297,30 @@ export function BookingDrawer({ booking, onClose, onChanged }: BookingDrawerProp
             />
           </div>
         )}
+
+        {/* Drafts an answer grounded in this booking's real availability and
+            pricing. Walt edits and sends; nothing leaves without him. */}
+        <div className="mt-6 rounded-button border border-gold/15 bg-charcoal p-3">
+          <p className="mb-2 text-[10px] tracking-wide text-text-muted uppercase">
+            Reply assistant
+          </p>
+          {showDrafter ? (
+            <DraftReplyPanel
+              bookingId={booking.id}
+              customerEmail={booking.customer_email}
+              channel="web"
+              initialMessage={booking.notes ?? ''}
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowDrafter(true)}
+              className="rounded-button border border-gold/40 px-3 py-2 text-xs text-gold hover:bg-gold hover:text-charcoal"
+            >
+              Draft a reply
+            </button>
+          )}
+        </div>
 
         <div className="mt-6">
           <label className="mb-2 block text-xs tracking-wide text-text-muted uppercase">
