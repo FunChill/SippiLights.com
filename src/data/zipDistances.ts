@@ -70,6 +70,29 @@ export const ZIP_DISTANCES: Record<string, number> = {
   '39111': 45, // Magee
   '39180': 45, // Vicksburg
   '39194': 48, // Yazoo City
+
+  // Beyond 50 miles: NOT bookable online. Listed deliberately rather than
+  // left absent — an absent ZIP reads as "unknown, we'll confirm", which is
+  // vaguer than these deserve. Naming them lets the site (and the Phase 10
+  // reply drafter) say plainly that it's outside the service area instead of
+  // implying a quote might follow.
+  '39601': 55, // Brookhaven
+  '39090': 65, // Kosciusko
+  '39648': 75, // McComb
+  '39350': 80, // Philadelphia
+  '39440': 85, // Laurel
+  '39401': 90, // Hattiesburg
+  '39301': 95, // Meridian
+  '38930': 95, // Greenwood
+  '39120': 110, // Natchez
+  '39759': 110, // Starkville
+  '38701': 115, // Greenville
+  '39701': 120, // Columbus
+  '38801': 150, // Tupelo
+  '38655': 150, // Oxford
+  '39501': 160, // Gulfport
+  '39530': 165, // Biloxi
+  '39567': 175, // Pascagoula
 }
 
 /**
