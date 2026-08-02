@@ -1,6 +1,9 @@
 import { supabase } from './supabaseClient'
 import type { Finish } from '../data/inventory'
-import { SPECIAL_SCHEDULING_LEAD_DAYS } from '../config/pricing'
+// Conflict wording lives in availabilityWording.ts so the Phase 10 reply
+// drafter can reuse it server-side; this module's Supabase import is
+// browser-only. Re-exported here so existing callers are unaffected.
+export { describeConflicts, daysUntil, hasSpecialSchedulingLeadTime } from './availabilityWording'
 
 export interface RequestedItem {
   character: string
@@ -177,36 +180,4 @@ export function logDemandSignals(result: AvailabilityResult): void {
   }).catch(() => {
     /* buying signal, not an audit log — losses are fine */
   })
-}
-
-function daysUntil(dateStr: string): number {
-  const target = new Date(`${dateStr}T00:00:00`)
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  return Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
-}
-
-/**
- * Human-readable summary of why a date isn't fully available, naming the
- * conflicting characters. Deliberately never reveals *why* an item is
- * unavailable (booked vs. a fleet quantity limit) — customer-facing copy
- * should never expose fleet size. With 14+ days of lead time the message
- * stays open-ended ("may need special scheduling") since there may be time
- * to work it out; under that, it's just "not available."
- */
-export function describeConflicts(result: AvailabilityResult): string {
-  if (result.blocked) return result.blockReason ?? 'This date is unavailable.'
-
-  const conflicts = result.items.filter((i) => !i.available)
-  if (conflicts.length === 0) return ''
-
-  const chars = conflicts.map((c) => `"${c.character}"`).join(', ')
-  const isPlural = conflicts.length > 1
-  const hasLeadTime = daysUntil(result.date) >= SPECIAL_SCHEDULING_LEAD_DAYS
-
-  if (hasLeadTime) {
-    return `The letter${isPlural ? 's' : ''} ${chars} may need special scheduling for that date — reach out and we'll confirm within 24 hours.`
-  }
-
-  return `The letter${isPlural ? 's' : ''} ${chars} ${isPlural ? 'are' : 'is'} not available for that date.`
 }
