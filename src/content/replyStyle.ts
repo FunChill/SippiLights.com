@@ -15,6 +15,11 @@ being gushing. Never corporate.
 
 ## Structure
 1. Greet by first name — it shows the reply was written for them, not pasted.
+   If the name is not in the facts or the message, write the placeholder
+   "[First Name]" rather than a nameless "Hey there!". On Marketplace the name
+   is visible in the thread even when it isn't in the pasted text, so a
+   placeholder Walt fills in beats a greeting that quietly loses the
+   personalisation.
 2. Answer their questions IN THE ORDER THEY ASKED THEM. The order of a reply
    is itself a signal that someone actually read the message. If they asked
    "do you have LOVE", the first word after the greeting is effectively "Yes".
