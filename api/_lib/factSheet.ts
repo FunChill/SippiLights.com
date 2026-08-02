@@ -45,13 +45,26 @@ export interface FactSheetFact {
   value: string
 }
 
+/**
+ * A figure the drafter may state, tagged with what it actually IS. The role
+ * matters: $35 can be a legitimate deposit AND a legitimate travel fee in the
+ * same quote, and a draft that swaps them is wrong even though both numbers
+ * appear on the sheet.
+ */
+export type AmountRole = 'per-marquee' | 'subtotal' | 'deposit' | 'travel-fee' | 'already-paid'
+
+export interface AllowedAmount {
+  value: number
+  role: AmountRole
+}
+
 export interface FactSheet {
   /** Rendered for the prompt. */
   text: string
   /** Machine-readable, for validating the draft afterwards. */
   facts: FactSheetFact[]
-  /** Every dollar figure the drafter is permitted to state. */
-  allowedAmounts: number[]
+  /** Every dollar figure the drafter is permitted to state, with its role. */
+  allowedAmounts: AllowedAmount[]
   /** Every date the drafter is permitted to state, ISO form. */
   allowedDates: string[]
   /** Things we could not determine — the drafter must not invent these. */
@@ -154,8 +167,9 @@ async function checkAvailabilityServerSide(
 export async function buildFactSheet(input: FactSheetInput): Promise<FactSheet> {
   const facts: FactSheetFact[] = []
   const unknowns: string[] = []
-  const allowedAmounts: number[] = []
+  const allowedAmounts: AllowedAmount[] = []
   const allowedDates: string[] = []
+  const allow = (value: number, role: AmountRole) => allowedAmounts.push({ value, role })
 
   const booking = input.bookingId ? await loadBooking(input.bookingId) : null
 
@@ -226,7 +240,7 @@ export async function buildFactSheet(input: FactSheetInput): Promise<FactSheet> 
     label: 'Price per marquee',
     value: `${formatCurrency(MARQUEE_PRICE)} per marquee, per event day`,
   })
-  allowedAmounts.push(MARQUEE_PRICE)
+  allow(MARQUEE_PRICE, 'per-marquee')
 
   if (marqueeCount > 0) {
     const marqueeSubtotal = marqueeCount * MARQUEE_PRICE
@@ -237,7 +251,8 @@ export async function buildFactSheet(input: FactSheetInput): Promise<FactSheet> 
       label: 'Deposit due to reserve',
       value: `${formatCurrency(deposit)} (flat $20 for one marquee, 25% of the marquee subtotal for two or more)`,
     })
-    allowedAmounts.push(marqueeSubtotal, deposit)
+    allow(marqueeSubtotal, 'subtotal')
+    allow(deposit, 'deposit')
   } else {
     unknowns.push('No marquee count yet — do not quote a total or a deposit.')
   }
@@ -270,7 +285,7 @@ export async function buildFactSheet(input: FactSheetInput): Promise<FactSheet> 
           'The travel fee is collected with the balance at delivery — it is NEVER part of the deposit. ' +
           'The deposit stays purely marquee-based.',
       })
-      allowedAmounts.push(travelFee)
+      allow(travelFee, 'travel-fee')
       if (marqueeCount > 0 && marqueeCount < MIN_MARQUEES_OUTSIDE_25) {
         facts.push({
           label: 'Minimum not met',
@@ -305,10 +320,10 @@ export async function buildFactSheet(input: FactSheetInput): Promise<FactSheet> 
 
   // --- Existing booking money -------------------------------------------
   if (booking) {
-    if (booking.subtotal !== null) allowedAmounts.push(Number(booking.subtotal))
-    if (booking.deposit_due !== null) allowedAmounts.push(Number(booking.deposit_due))
+    if (booking.subtotal !== null) allow(Number(booking.subtotal), 'subtotal')
+    if (booking.deposit_due !== null) allow(Number(booking.deposit_due), 'deposit')
     if (booking.amount_paid !== null) {
-      allowedAmounts.push(Number(booking.amount_paid))
+      allow(Number(booking.amount_paid), 'already-paid')
       facts.push({
         label: 'Already paid',
         value: booking.paid_in_full
@@ -336,10 +351,22 @@ export async function buildFactSheet(input: FactSheetInput): Promise<FactSheet> 
     faq,
   ].join('\n')
 
+  // Dedupe on value+role: the same figure can legitimately hold two roles
+  // (a $35 deposit and a $35 travel fee), and both must survive.
+  const seen = new Set<string>()
+  const dedupedAmounts = allowedAmounts
+    .map((a) => ({ value: Math.round(a.value * 100) / 100, role: a.role }))
+    .filter((a) => {
+      const key = `${a.value}:${a.role}`
+      if (seen.has(key)) return false
+      seen.add(key)
+      return true
+    })
+
   return {
     text,
     facts,
-    allowedAmounts: [...new Set(allowedAmounts.map((a) => Math.round(a * 100) / 100))],
+    allowedAmounts: dedupedAmounts,
     allowedDates: [...new Set(allowedDates)],
     unknowns,
   }
@@ -356,15 +383,42 @@ export function validateDraftAgainstFacts(
   sheet: FactSheet,
 ): string[] {
   const warnings: string[] = []
+  const approved = sheet.allowedAmounts
+  const values = new Set(approved.map((a) => a.value))
+  const summary = approved.map((a) => `$${a.value} (${a.role})`).join(', ') || '(none)'
 
+  // 1. Every figure must appear on the sheet at all.
   const amounts = [...draft.matchAll(/\$\s?([\d,]+(?:\.\d{1,2})?)/g)].map((m) =>
     Number(m[1].replace(/,/g, '')),
   )
   for (const amount of amounts) {
-    if (!sheet.allowedAmounts.includes(amount)) {
+    if (!values.has(amount)) {
       warnings.push(
-        `Draft states $${amount}, which is not on the fact sheet. Approved figures: ${sheet.allowedAmounts.map((a) => `$${a}`).join(', ') || '(none)'}.`,
+        `Draft states $${amount}, which is not on the fact sheet. Approved figures: ${summary}.`,
       )
+    }
+  }
+
+  // 2. And must be used in the RIGHT role. A real number in the wrong slot —
+  // quoting the deposit as the travel fee — is still a wrong quote.
+  const roleClaims: [RegExp, AmountRole, string][] = [
+    [/deposit[^.$\n]{0,60}?\$\s?([\d,]+(?:\.\d{1,2})?)/gi, 'deposit', 'the deposit'],
+    [/\$\s?([\d,]+(?:\.\d{1,2})?)[^.\n]{0,40}?deposit/gi, 'deposit', 'the deposit'],
+    [/travel fee[^.$\n]{0,60}?\$\s?([\d,]+(?:\.\d{1,2})?)/gi, 'travel-fee', 'the travel fee'],
+    [/\$\s?([\d,]+(?:\.\d{1,2})?)[^.\n]{0,40}?travel fee/gi, 'travel-fee', 'the travel fee'],
+  ]
+  for (const [pattern, role, label] of roleClaims) {
+    for (const match of draft.matchAll(pattern)) {
+      const stated = Number(match[1].replace(/,/g, ''))
+      const validForRole = approved.some((a) => a.role === role && a.value === stated)
+      if (!validForRole) {
+        const correct = approved.filter((a) => a.role === role)
+        warnings.push(
+          correct.length > 0
+            ? `Draft gives ${label} as $${stated}, but the sheet says ${correct.map((a) => `$${a.value}`).join(' or ')}.`
+            : `Draft states ${label} as $${stated}, but the fact sheet has no ${label} for this inquiry.`,
+        )
+      }
     }
   }
 
