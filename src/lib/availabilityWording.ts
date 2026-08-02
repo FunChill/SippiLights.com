@@ -1,4 +1,9 @@
-import { SPECIAL_SCHEDULING_LEAD_DAYS } from '../config/pricing'
+// .js extension is REQUIRED here even though this is a src/ file: api/_lib/
+// factSheet.ts imports this module, and Vercel runs the api/ folder as native
+// Node ESM, which does not resolve extensionless relative imports. Vite
+// resolves the .js back to this .ts for the browser build, so both work.
+// Any src/ module the server imports must follow this rule.
+import { SPECIAL_SCHEDULING_LEAD_DAYS } from '../config/pricing.js'
 
 /**
  * Customer-facing wording for availability outcomes.
