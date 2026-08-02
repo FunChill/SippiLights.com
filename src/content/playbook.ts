@@ -39,7 +39,7 @@ export const PLAYBOOK: PlaybookEntry[] = [
       'Before leaving, tell the contact: "Please don\'t move the letters — if anything needs to shift, call or text us at (601) 813-2464 and we\'ll handle it."',
     ],
     notes:
-      'Delivery is free within 25 miles of Jackson (39211). 26–50 miles requires a 4+ marquee order. Never beyond 50 miles without prior arrangement.',
+      'Delivery is free within 25 miles of Jackson (39211). 26–50 miles requires a 2+ marquee order and carries a flat $35 travel fee, collected with the balance at delivery — never as part of the deposit. Beyond 50 miles we decline politely; it is outside the service area.',
   },
   {
     slug: 'teardown-pickup',
@@ -103,7 +103,7 @@ export const PLAYBOOK: PlaybookEntry[] = [
     steps: [
       'Tone, always: casually friendly, excited for their event. These are birthdays, weddings, graduations — match the energy.',
       'Response time targets: new inquiry within 24 hours (the auto-reply promises this). Booking questions same day. Day-of-event messages immediately.',
-      'Every inquiry gets answered even if the date is unavailable — offer the nearest available date instead of a flat no.',
+      'Every inquiry gets answered even if the date is unavailable. Do NOT propose an alternative date — that is the owner\'s call. Instead ask whether they would like us to reach out if that date opens up, since reservations do sometimes move or cancel. Never phrase it as a hold.',
       'NEVER tell a customer how many of an item we own, or that we "don\'t have enough". The words are: "not available for that date" or, with 14+ days lead, "may need special scheduling — reach out and we\'ll confirm within 24 hours".',
       'Confirmations, cancellations, damage follow-ups, and anything involving money go in WRITING (email), even if it was agreed on a call first.',
       'The system emails automatically: booking confirmation (instant), reminder (3 days before), thank-you + feedback ask (1 day after). Don\'t duplicate these manually.',

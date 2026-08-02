@@ -51,7 +51,18 @@ const SCHEMA = {
   },
 }
 
-function buildSystemPrompt(factSheetText: string): string {
+/**
+ * Email is a letter and gets signed; Marketplace and text are a conversation
+ * in a thread that already shows who is talking, where a sign-off reads stiff.
+ * Walt's own replies confirm it — he signs email, not Messenger.
+ */
+function signatureRule(channel: string): string {
+  return channel === 'messenger' || channel === 'sms'
+    ? 'Do NOT sign off. No "Walt", no "Thanks,". This is a threaded conversation — a signature reads stiff and formal there. End on the open-ended question.'
+    : 'Sign off as Walt on its own line.'
+}
+
+function buildSystemPrompt(factSheetText: string, channel: string): string {
   return `You draft replies to rental inquiries for Sippi Lights, a marquee letter rental business in Jackson, Mississippi. Walt owns it and sends every reply himself — you write the draft, he approves it.
 
 THE MOST IMPORTANT RULE: you do not compute anything. Every price, fee, date, and availability answer is supplied below. Restate those facts; never derive, estimate, or adjust one. If something is not in the facts, say plainly that you need it rather than guessing.
@@ -70,7 +81,10 @@ For spam and scam, return an empty draft.
 ${factSheetText}
 
 === HOW WALT WRITES ===
-${REPLY_STYLE}`
+${REPLY_STYLE}
+
+=== SIGN-OFF FOR THIS CHANNEL (${channel}) ===
+${signatureRule(channel)}`
 }
 
 /**
@@ -131,7 +145,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       body: JSON.stringify({
         model: MODEL,
         max_tokens: 4000,
-        system: buildSystemPrompt(sheet.text),
+        system: buildSystemPrompt(sheet.text, channel ?? 'web'),
         messages: [
           {
             role: 'user',
