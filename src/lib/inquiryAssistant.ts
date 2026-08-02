@@ -60,6 +60,19 @@ export async function fetchTriageByBooking(): Promise<Map<string, Triage>> {
   return map
 }
 
+/** Bookings we've actually replied to — the line between a lead and a quote. */
+export async function fetchRepliedBookingIds(): Promise<Set<string>> {
+  const { data, error } = await supabase
+    .from('inquiry_messages')
+    .select('booking_id')
+    .eq('direction', 'outbound')
+    .not('sent_at', 'is', null)
+    .not('booking_id', 'is', null)
+
+  if (error) return new Set()
+  return new Set((data ?? []).map((r) => r.booking_id as string))
+}
+
 export async function draftReply(input: {
   message: string
   bookingId?: string

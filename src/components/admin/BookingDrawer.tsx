@@ -298,6 +298,28 @@ export function BookingDrawer({ booking, onClose, onChanged }: BookingDrawerProp
           </div>
         )}
 
+        {/* The one pipeline flag that can't be derived — it records the
+            customer's answer, not something that happened. */}
+        <label className="mt-4 flex cursor-pointer items-start gap-2 text-xs text-text-muted">
+          <input
+            type="checkbox"
+            checked={booking.waitlist_requested}
+            onChange={(e) =>
+              run('waitlist', () =>
+                updateBooking(booking.id, { waitlist_requested: e.target.checked }),
+              )
+            }
+            disabled={busy !== null}
+            className="mt-0.5 accent-[#c9a84c]"
+          />
+          <span>
+            Wants a call if this date frees up
+            <span className="block text-[10px] text-text-muted/70">
+              Not a hold — nothing is reserved for them.
+            </span>
+          </span>
+        </label>
+
         {/* Drafts an answer grounded in this booking's real availability and
             pricing. Walt edits and sends; nothing leaves without him. */}
         <div className="mt-6 rounded-button border border-gold/15 bg-charcoal p-3">

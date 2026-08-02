@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { NavLink, Route, Routes } from 'react-router-dom'
 import type { Session } from '@supabase/supabase-js'
 import { useSEO } from '../lib/seo'
@@ -17,9 +17,12 @@ import { DraftReplyPanel } from '../components/admin/DraftReplyPanel'
 import {
   TRIAGE_COLORS,
   TRIAGE_LABELS,
+  fetchRepliedBookingIds,
   fetchTriageByBooking,
   type Triage,
 } from '../lib/inquiryAssistant'
+import { PipelineStrip, StageBadge } from '../components/admin/PipelineStrip'
+import { buildPipeline, type Stage } from '../lib/pipeline'
 import Financials from './admin/Financials'
 import Assets from './admin/Assets'
 import Playbook from './admin/Playbook'
@@ -253,6 +256,8 @@ function Dashboard() {
   const [upcoming, setUpcoming] = useState<Booking[]>([])
   const [selected, setSelected] = useState<Booking | null>(null)
   const [triageMap, setTriageMap] = useState<Map<string, Triage>>(new Map())
+  const [repliedIds, setRepliedIds] = useState<Set<string>>(new Set())
+  const [stageFilter, setStageFilter] = useState<Stage | 'all' | 'info_needed' | 'waitlist'>('all')
   const [refreshKey, setRefreshKey] = useState(0)
 
   const refresh = useCallback(() => setRefreshKey((k) => k + 1), [])
@@ -273,7 +278,32 @@ function Dashboard() {
 
     fetchInquiries().then(setInquiries).catch(() => setInquiries([]))
     fetchTriageByBooking().then(setTriageMap).catch(() => setTriageMap(new Map()))
+    fetchRepliedBookingIds().then(setRepliedIds).catch(() => setRepliedIds(new Set()))
   }, [viewDate, refreshKey])
+
+  // The pipeline spans the month's bookings plus every open inquiry, so a lead
+  // with no date yet still shows up in the funnel.
+  const pipelineEntries = useMemo(() => {
+    const byId = new Map<string, Booking>()
+    for (const b of [...bookings, ...upcoming, ...inquiries]) byId.set(b.id, b)
+    return buildPipeline([...byId.values()], repliedIds)
+  }, [bookings, upcoming, inquiries, repliedIds])
+
+  const stageOf = useMemo(
+    () => new Map(pipelineEntries.map((e) => [e.booking.id, e])),
+    [pipelineEntries],
+  )
+
+  const matchesFilter = (id: string) => {
+    if (stageFilter === 'all') return true
+    const entry = stageOf.get(id)
+    if (!entry) return false
+    if (stageFilter === 'info_needed') {
+      return entry.gaps.length > 0 && entry.stage !== 'closed' && entry.stage !== 'delivered'
+    }
+    if (stageFilter === 'waitlist') return entry.waitlisted && entry.stage !== 'closed'
+    return entry.stage === stageFilter
+  }
 
   const year = viewDate.getFullYear()
   const month = viewDate.getMonth()
@@ -290,6 +320,14 @@ function Dashboard() {
   return (
     <div>
       <div>
+        <div className="mb-6">
+          <PipelineStrip
+            entries={pipelineEntries}
+            selected={stageFilter}
+            onSelect={setStageFilter}
+          />
+        </div>
+
         <div className="grid gap-8 lg:grid-cols-[1.6fr_1fr]">
           <div>
             {/* Calendar */}
@@ -371,25 +409,29 @@ function Dashboard() {
                 <p className="mt-3 text-sm text-text-muted">Nothing scheduled.</p>
               ) : (
                 <div className="mt-3 flex flex-col gap-2">
-                  {upcoming.map((b) => (
-                    <button
-                      key={b.id}
-                      type="button"
-                      onClick={() => setSelected(b)}
-                      className="flex items-center justify-between rounded-button border border-gold/10 px-3 py-2 text-left text-sm hover:border-gold/40"
-                    >
-                      <span>
-                        <span className="text-gold">{b.event_date}</span> ·{' '}
-                        {b.word_built ? `"${b.word_built}"` : b.customer_name}
-                      </span>
-                      <span
-                        className="rounded px-1.5 py-0.5 text-[10px] text-charcoal"
-                        style={{ backgroundColor: STATUS_COLORS[b.status] }}
+                  {upcoming.filter((b) => matchesFilter(b.id)).map((b) => {
+                    const entry = stageOf.get(b.id)
+                    return (
+                      <button
+                        key={b.id}
+                        type="button"
+                        onClick={() => setSelected(b)}
+                        className="flex flex-wrap items-center justify-between gap-2 rounded-button border border-gold/10 px-3 py-2 text-left text-sm hover:border-gold/40"
                       >
-                        {STATUS_LABELS[b.status]}
-                      </span>
-                    </button>
-                  ))}
+                        <span>
+                          <span className="text-gold">{b.event_date}</span> ·{' '}
+                          {b.word_built ? `"${b.word_built}"` : b.customer_name}
+                        </span>
+                        {entry && (
+                          <StageBadge
+                            stage={entry.stage}
+                            gaps={entry.gaps}
+                            waitlisted={entry.waitlisted}
+                          />
+                        )}
+                      </button>
+                    )
+                  })}
                 </div>
               )}
             </div>
@@ -403,8 +445,9 @@ function Dashboard() {
                 <p className="mt-3 text-sm text-text-muted">Inbox zero. Nice.</p>
               ) : (
                 <div className="mt-3 flex flex-col gap-2">
-                  {inquiries.map((b) => {
+                  {inquiries.filter((b) => matchesFilter(b.id)).map((b) => {
                     const triage = triageMap.get(b.id)
+                    const entry = stageOf.get(b.id)
                     return (
                       <button
                         key={b.id}
@@ -418,6 +461,13 @@ function Dashboard() {
                       >
                         <span className="flex flex-wrap items-center gap-2">
                           <span className="text-warm-white">{b.customer_name}</span>
+                          {entry && (
+                            <StageBadge
+                              stage={entry.stage}
+                              gaps={entry.gaps}
+                              waitlisted={entry.waitlisted}
+                            />
+                          )}
                           {triage && (
                             <span
                               className={`rounded border px-1.5 py-0.5 text-[9px] tracking-wide uppercase ${TRIAGE_COLORS[triage]}`}

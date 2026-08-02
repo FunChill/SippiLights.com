@@ -41,6 +41,7 @@ export interface Booking {
   stripe_payment_intent_id: string | null
   refunded_at: string | null
   refund_amount: number | null
+  waitlist_requested: boolean
 }
 
 export const STATUS_COLORS: Record<BookingStatus, string> = {
