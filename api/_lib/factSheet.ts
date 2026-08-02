@@ -330,6 +330,17 @@ export async function buildFactSheet(input: FactSheetInput): Promise<FactSheet> 
       'LED Uplighting, Stage, and 3D Arch are priced at confirmation. NEVER quote a number for these.',
   })
   facts.push({
+    label: 'Lighting',
+    value:
+      'Marquees are lit with LED STRIP lighting, not bulbs. Never write "bulbs". ' +
+      'The colour adjusts to the customer\'s theme. Letters are classic white; ' +
+      'numbers come in black or white.',
+  })
+  facts.push({
+    label: 'Setup timing',
+    value: 'Prior-day setup is available at no extra charge.',
+  })
+  facts.push({
     label: 'Holds',
     value:
       'Nothing is reserved until a deposit is paid. A saved inquiry holds no inventory. Never imply a date is being held.',

@@ -13,7 +13,7 @@ const [stage, arch3d] = getItemsByCategory('stage')
 const FEATURE_ITEMS = [
   {
     item: ledUplighting,
-    finishNote: 'Bulbs adjustable to any event color scheme',
+    finishNote: 'LED lighting adjustable to any event color scheme',
     copy: 'Wireless LED uplights wash walls, tents, columns, and dance floors in color. Every fixture is remote-controlled and dialed in to your palette on site, so your venue transforms the moment the lights go up.',
   },
   {

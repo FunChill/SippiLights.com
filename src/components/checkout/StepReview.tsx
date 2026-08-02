@@ -175,7 +175,7 @@ export function StepReview() {
         <Row label="Event Date" value={checkout.eventDate} />
         <Row label="Event Type" value={checkout.eventType} />
         <Row label="Marquee" value={word || '—'} />
-        <Row label="Bulb Color" value={color.label} />
+        <Row label="LED color" value={color.label} />
         {hasNumbers && <Row label="Number Finish" value={numberFinish} />}
         {selectedAddOns.length > 0 && (
           <Row

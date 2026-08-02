@@ -5,7 +5,7 @@ export default function Builder() {
   useSEO({
     title: 'Build Your Marquee Word | Sippi Lights Jackson MS',
     description:
-      'Type your word or number and watch it light up as a custom marquee. Pick your bulb color, choose a finish, and see your price instantly.',
+      'Type your word or number and watch it light up as a custom marquee. Pick your LED color, choose a finish, and see your price instantly.',
   })
 
   return (
@@ -19,7 +19,7 @@ export default function Builder() {
         </h1>
         <p className="mt-6 max-w-xl text-text-muted">
           Type a name, a number, or a message up to 20 characters and watch
-          it come to life as a glowing marquee. Pick your bulb color and see
+          it come to life as a glowing marquee. Pick your LED color and see
           your price update in real time.
         </p>
 

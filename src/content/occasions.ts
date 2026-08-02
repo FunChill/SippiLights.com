@@ -36,7 +36,7 @@ export const OCCASIONS: OccasionPage[] = [
       {
         heading: 'Milestone birthdays are our specialty',
         body: [
-          'First birthdays, sweet sixteens, 21sts, dirty thirties, fabulous forties, and every golden birthday in between — numbers are the fastest-booking pieces in our fleet, especially milestone pairs like 3-0 and 5-0 on popular weekends. Numbers come in black or white finishes, letters in classic white, and every bulb adjusts to match your party colors: soft warm white for an elegant dinner, hot pink for a sweet sixteen, or color-shifting for the dance floor.',
+          'First birthdays, sweet sixteens, 21sts, dirty thirties, fabulous forties, and every golden birthday in between — numbers are the fastest-booking pieces in our fleet, especially milestone pairs like 3-0 and 5-0 on popular weekends. Numbers come in black or white finishes, letters in classic white, and every LED adjusts to match your party colors: soft warm white for an elegant dinner, hot pink for a sweet sixteen, or color-shifting for the dance floor.',
           'Use the live word builder on our booking page to type the exact name or age, see it glow, and get an instant price before you commit to anything.',
         ],
       },
@@ -77,7 +77,7 @@ export const OCCASIONS: OccasionPage[] = [
       {
         heading: 'Warm white elegance or your exact wedding palette',
         body: [
-          'Our letters come in classic white with warm-glow bulbs that photograph beautifully in dim reception light — no harsh glare, just that golden marquee warmth. If your palette calls for something more, every bulb adjusts: blush pink, deep amber, or an exact match to your wedding colors.',
+          'Our letters come in classic white with warm-glow LED lighting that photograph beautifully in dim reception light — no harsh glare, just that golden marquee warmth. If your palette calls for something more, every LED adjusts: blush pink, deep amber, or an exact match to your wedding colors.',
           'Add LED uplighting and the whole room follows suit. Wireless fixtures wash venue walls, columns, and drape in your colors, dialed in on site the day of. Pair with our illuminated 3D arch for a ceremony backdrop or photo moment that guests line up for.',
         ],
       },
@@ -116,9 +116,9 @@ export const OCCASIONS: OccasionPage[] = [
         ],
       },
       {
-        heading: 'Matched to her dress, down to the bulb',
+        heading: 'Matched to her dress, down to the LED',
         body: [
-          "Every quinceañera has a color story, and our bulbs follow it. Choose the glow when you book — rose gold, lavender, royal blue, hot pink, or classic warm white — and we dial it in at setup so the 15 matches the dress, the cake, and the dama dresses in every photo.",
+          "Every quinceañera has a color story, and our LEDs follow it. Choose the glow when you book — rose gold, lavender, royal blue, hot pink, or classic warm white — and we dial it in at setup so the 15 matches the dress, the cake, and the dama dresses in every photo.",
           'Numbers come in black or white finishes. Add LED uplighting and the venue walls carry her color from the entrance to the dance floor, or frame the head table with our illuminated arch for the crown moment.',
         ],
       },
@@ -159,7 +159,7 @@ export const OCCASIONS: OccasionPage[] = [
       {
         heading: 'Brand colors, not close-enough colors',
         body: [
-          'Every marquee bulb and uplight fixture adjusts to your exact brand palette on site. Holiday party gold, company-blue product launch, or a red-carpet awards night — we tune the room to the brand standard your marketing team will actually approve.',
+          'Every marquee LED and uplight fixture adjusts to your exact brand palette on site. Holiday party gold, company-blue product launch, or a red-carpet awards night — we tune the room to the brand standard your marketing team will actually approve.',
           'Our fixtures are wireless, so venue layouts stay flexible: wash the ballroom columns, frame the stage, or line the entry walk without a cord in sight.',
         ],
       },
@@ -200,7 +200,7 @@ export const OCCASIONS: OccasionPage[] = [
       {
         heading: 'School colors on command',
         body: [
-          'Every bulb adjusts to the school palette — purple and gold, maroon and white, navy and silver, or whatever banner they are walking under next fall. Letters come in classic white and numbers in black or white, so the display reads sharp in daylight and glows in every nighttime photo.',
+          'every LED adjusts to the school palette — purple and gold, maroon and white, navy and silver, or whatever banner they are walking under next fall. Letters come in classic white and numbers in black or white, so the display reads sharp in daylight and glows in every nighttime photo.',
           'Type the grad’s name or year into our live word builder to preview the display and price before you book anything.',
         ],
       },

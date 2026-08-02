@@ -115,7 +115,7 @@ export function WordBuilder({
 
       <div className="mt-6">
         <p className="mb-2 text-xs tracking-[0.15em] text-text-muted uppercase">
-          Bulb Color
+          LED color
         </p>
         <div className="flex flex-wrap gap-2">
           {MARQUEE_COLORS.map((c) => (

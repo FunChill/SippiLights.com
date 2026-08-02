@@ -93,12 +93,12 @@ export const FAQ_ITEMS: FaqItem[] = [
     category: 'The Marquees',
     question: 'What colors and finishes do the marquee letters come in?',
     answer:
-      'Letters come in classic white, and numbers come in black or white. Every marquee’s LED bulbs are adjustable to any color, so the glow can match your event’s exact color scheme.',
+      'Letters come in classic white, and numbers come in black or white. Every marquee’s LED lighting is adjustable to any color, so the glow can match your event’s exact color scheme.',
   },
   {
     category: 'The Marquees',
     question: 'What are the marquee letters made of?',
     answer:
-      'Our marquees are professionally built letter and number frames about four feet tall, fitted with warm LED bulbs. They’re freestanding, sturdy, and photograph beautifully day or night.',
+      'Our marquees are professionally built letter and number frames about four feet tall, lit with warm LED strip lighting — not bulbs. They’re freestanding, sturdy, and photograph beautifully day or night.',
   },
 ]

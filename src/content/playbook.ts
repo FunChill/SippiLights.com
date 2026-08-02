@@ -30,7 +30,7 @@ export const PLAYBOOK: PlaybookEntry[] = [
     category: 'Delivery',
     steps: [
       'The day before: open the booking in the dashboard (/admin), confirm the venue address, indoor/outdoor, the exact characters ordered, and the LED color. Text the customer a delivery window.',
-      'Load the van: pull each character on the order, check every bulb lights before it leaves the shop (plug-in test), load padded side down, tallest items against the wall. Bring: extension cords (25ft minimum ×2), power strip, spare bulbs, zip ties, sandbags/weights for outdoor, gloves.',
+      'Load the van: pull each character on the order, check every character lights fully before it leaves the shop (plug-in test, watch for dead LED segments), load padded side down, tallest items against the wall. Bring: extension cords (25ft minimum ×2), power strip, spare LED strip + connectors, zip ties, sandbags/weights for outdoor, gloves.',
       'On arrival: find the on-site contact (must be 18+, per the rental agreement). Walk the placement spot together BEFORE unloading. Confirm a standard outlet within 25 feet.',
       'Placement check: level ground, not blocking exits or walkways, away from sprinklers, open flames, and standing water. Outdoors: check overhead (no low branches/lines) and anchor every unit with weights.',
       'Assemble the display in order, plug in through the power strip, light it fully. Roughly nine characters max per standard breaker — split across outlets if the order is bigger.',
@@ -49,8 +49,8 @@ export const PLAYBOOK: PlaybookEntry[] = [
       'Arrive in the scheduled pickup window. Text the venue contact when 30 minutes out.',
       'Before touching anything: walk the display and photograph each unit, front and back. This is the condition record if damage is found.',
       'Unplug at the outlet first, then disassemble. Coil cords separately — never leave a cord attached to a unit in transit.',
-      'Inspect each character as you load: bulbs intact, frame straight, finish unscratched. Any problem → follow "Damaged Item at Pickup" SOP before leaving the venue.',
-      'Back at the shop: wipe each unit down, replace any dead bulbs now (not on the next delivery morning), and return each character to its labeled storage spot.',
+      'Inspect each character as you load: LED strip fully lit, frame straight, finish unscratched. Any problem → follow "Damaged Item at Pickup" SOP before leaving the venue.',
+      'Back at the shop: wipe each unit down, repair any dead LED segments now (not on the next delivery morning), and return each character to its labeled storage spot.',
       'Update the dashboard if anything needs repair: /admin/inventory → edit the item → set condition to "needs repair" with a note.',
     ],
   },
@@ -129,7 +129,7 @@ export const PLAYBOOK: PlaybookEntry[] = [
     title: 'Routine Inventory Maintenance',
     category: 'Inventory Maintenance',
     steps: [
-      'Monthly (first Monday): plug-test every character in storage. Replace dead bulbs immediately from spares; reorder spares when below 20.',
+      'Monthly (first Monday): plug-test every character in storage. Repair dead LED segments immediately from spare strip; reorder strip and connectors when running low.',
       'Wipe-down and frame inspection at every teardown (see Teardown SOP) — maintenance is continuous, not seasonal.',
       'After each monthly check, update /admin/inventory: set "last maintenance" to today on anything you touched, and adjust condition honestly — the asset register is only worth what it reflects.',
       'Watch the "Most-Requested Unavailable" widget on /admin/inventory — that list is what customers wanted and couldn\'t book. It is the shopping list, ranked by demand.',

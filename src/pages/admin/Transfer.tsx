@@ -15,7 +15,7 @@ const ITEMS: Array<{ key: string; label: string; detail: string }> = [
   { key: 'google_business', label: 'Google Business Profile', detail: 'Reviews, maps listing, local SEO' },
   { key: 'social', label: 'Social media accounts', detail: 'Facebook page + Instagram @sippi.lights' },
   { key: 'inventory_location', label: 'Physical inventory location', detail: 'Storage access, layout map, keys' },
-  { key: 'vendors', label: 'Vendor / supplier contacts', detail: 'Marquee suppliers, bulb spares, repair parts' },
+  { key: 'vendors', label: 'Vendor / supplier contacts', detail: 'Marquee suppliers, LED strip and connector spares, repair parts' },
   { key: 'insurance', label: 'Insurance policy', detail: 'Liability policy — transfer or new owner obtains equivalent' },
   { key: 'llc', label: 'Business entity (LLC) transfer/assignment', detail: 'Entity sale vs. asset sale — attorney handles the paperwork' },
   { key: 'bank', label: 'Business bank account', detail: 'New owner opens their own; close or retitle existing' },
