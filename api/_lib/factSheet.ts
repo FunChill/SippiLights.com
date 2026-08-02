@@ -217,6 +217,16 @@ export async function buildFactSheet(input: FactSheetInput): Promise<FactSheet> 
             ? 'Everything requested is available for that date.'
             : describeConflicts(availability),
         })
+        if (!availability.allAvailable) {
+          facts.push({
+            label: 'When something is unavailable',
+            value:
+              'Do NOT propose a specific alternative date — that is Walt\'s call, not yours. ' +
+              'Instead ask whether they would like us to reach out if that date opens up ' +
+              '(reservations do sometimes move or cancel). Frame it as an offer, never as a ' +
+              'promise, and never imply anything is being held for them.',
+          })
+        }
         facts.push({
           label: 'Availability wording rule',
           value:
@@ -298,6 +308,13 @@ export async function buildFactSheet(input: FactSheetInput): Promise<FactSheet> 
         value:
           `Over ${MAX_RADIUS_MI} miles — outside the service area and NOT bookable online. ` +
           'Do not quote a price or a travel fee. Hand this to Walt.',
+      })
+      facts.push({
+        label: 'Out-of-area reply rule',
+        value:
+          'Decline politely and thank them for checking with us. Do NOT refer them to a ' +
+          'competitor, do NOT suggest we might make an exception, and do NOT quote anything. ' +
+          'Warm, brief, and final — they took the time to ask, so the no should feel gracious.',
       })
     }
   } else if (zip) {
@@ -419,6 +436,45 @@ export function validateDraftAgainstFacts(
             : `Draft states ${label} as $${stated}, but the fact sheet has no ${label} for this inquiry.`,
         )
       }
+    }
+  }
+
+  // 3. Any date named must be the customer's own. Walt's rule: never propose
+  // an alternative date — that's his call. An alternative date is by
+  // definition not on the sheet, so this catches it structurally rather than
+  // trying to pattern-match persuasion.
+  const MONTHS = [
+    'january', 'february', 'march', 'april', 'may', 'june',
+    'july', 'august', 'september', 'october', 'november', 'december',
+  ]
+  const allowedForms = new Set<string>()
+  for (const iso of sheet.allowedDates) {
+    allowedForms.add(iso)
+    const d = new Date(`${iso}T00:00:00`)
+    if (!Number.isNaN(d.getTime())) {
+      const month = MONTHS[d.getMonth()]
+      const day = d.getDate()
+      allowedForms.add(`${month} ${day}`)
+      allowedForms.add(`${month.slice(0, 3)} ${day}`)
+      allowedForms.add(`${d.getMonth() + 1}/${day}`)
+    }
+  }
+
+  const namedDates = [
+    ...draft.matchAll(/\b\d{4}-\d{2}-\d{2}\b/g),
+    ...draft.matchAll(
+      new RegExp(`\\b(?:${MONTHS.join('|')}|${MONTHS.map((m) => m.slice(0, 3)).join('|')})\\.?\\s+\\d{1,2}\\b`, 'gi'),
+    ),
+    ...draft.matchAll(/\b\d{1,2}\/\d{1,2}\b/g),
+  ].map((m) => m[0].toLowerCase().replace(/\./g, '').replace(/\s+/g, ' ').replace(/(\d+)(st|nd|rd|th)/, '$1'))
+
+  for (const named of namedDates) {
+    if (!allowedForms.has(named)) {
+      warnings.push(
+        sheet.allowedDates.length > 0
+          ? `Draft names "${named}", which is not the date on the inquiry (${sheet.allowedDates.join(', ')}). Never propose an alternative date.`
+          : `Draft names a date ("${named}") but the inquiry has no date on file. Ask for their date instead.`,
+      )
     }
   }
 

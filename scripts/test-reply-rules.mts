@@ -111,5 +111,30 @@ expectBlocked('price the customer asserted', 'You\'re right, we can do it for $1
 expectBlocked('plausible but wrong total', 'That comes to $200 all in.', SHEET)
 expectClean('every figure on the sheet', 'Marquees are $70 each, so $210 for three.', SHEET)
 
+console.log('\nRule 7 — never propose an alternative date (Walt decides that)')
+expectBlocked('suggests a different day', 'That one is tight, but how about September 26 instead?', SHEET)
+expectBlocked('suggests a numeric date', 'We could do 9/26 if that works.', SHEET)
+expectBlocked('suggests an ISO date', 'Would 2026-10-03 suit you better?', SHEET)
+expectClean('restates their own date', 'For September 19, everything you asked for is available.', SHEET)
+expectClean('their date, short month form', 'Sept 19 works — here is what it comes to.', SHEET)
+expectClean(
+  'offers to follow up if it frees up, without naming a new date',
+  "That one may need special scheduling. Want me to reach out if it opens up? Nothing's held either way.",
+  SHEET,
+)
+
+console.log('\nRule 8 — out of area declines politely, without referring elsewhere')
+const OUT_OF_AREA: FactSheet = {
+  ...SHEET,
+  allowedAmounts: [{ value: 70, role: 'per-marquee' }],
+  allowedDates: [],
+}
+expectBlocked('quotes a price anyway', 'We can come out for $210.', OUT_OF_AREA)
+expectClean(
+  'gracious decline',
+  "Thanks so much for checking with us — unfortunately you're outside the area we cover, so we have to pass on this one. Hope it's a great celebration.",
+  OUT_OF_AREA,
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 process.exit(failed === 0 ? 0 : 1)
